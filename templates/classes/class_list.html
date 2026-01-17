@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Minhas Turmas - School Hub{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Minhas Turmas</h1>
+        <div class="flex gap-3">
+            <a href="{% url 'classes:join' %}" class="px-4 py-2 border border-primary-600 dark:border-primary-400 text-primary-600 dark:text-primary-400 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">
+                Entrar em Turma
+            </a>
+            <a href="{% url 'classes:create' %}" class="px-4 py-2 gradient-bg text-white rounded-lg hover:opacity-90 transition-all">
+                Criar Turma
+            </a>
+        </div>
+    </div>
+
+    {% if classes %}
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for class in classes %}
+        <a href="{% url 'classes:detail' class.pk %}" class="bg-white dark:bg-dark-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-dark-700 hover:shadow-md hover:border-primary-200 dark:hover:border-primary-700 transition-all">
+            <div class="flex items-start justify-between mb-4">
+                <div class="w-12 h-12 gradient-bg rounded-xl flex items-center justify-center">
+                    <span class="material-icons-outlined text-white">groups</span>
+                </div>
+                <span class="text-sm text-gray-500 dark:text-gray-400">{{ class.year }}</span>
+            </div>
+
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">{{ class.name }}</h3>
+            <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">{{ class.school }}</p>
+
+            <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                <span>{{ class.member_count }} membros</span>
+                <span>{{ class.student_count }} alunos</span>
+            </div>
+
+            {% if class.active_events_count > 0 %}
+            <div class="mt-4 pt-4 border-t border-gray-100 dark:border-dark-700">
+                <span class="inline-flex items-center px-3 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 rounded-full text-sm">
+                    <span class="material-icons-outlined text-sm mr-1">event</span>
+                    {{ class.active_events_count }} evento(s) ativo(s)
+                </span>
+            </div>
+            {% endif %}
+        </a>
+        {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+    <div class="mt-8 flex justify-center">
+        {% include "partials/pagination.html" %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="bg-white dark:bg-dark-800 rounded-2xl shadow-sm p-12 text-center border border-gray-100 dark:border-dark-700">
+        <span class="material-icons-outlined text-gray-300 dark:text-gray-600 text-6xl mb-4">groups</span>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Nenhuma turma ainda</h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-6">Crie uma turma ou entre em uma existente com código de convite.</p>
+        <div class="flex justify-center gap-3">
+            <a href="{% url 'classes:join' %}" class="px-4 py-2 border border-primary-600 dark:border-primary-400 text-primary-600 dark:text-primary-400 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">
+                Entrar com Código
+            </a>
+            <a href="{% url 'classes:create' %}" class="px-4 py-2 gradient-bg text-white rounded-lg hover:opacity-90 transition-all">
+                Criar Turma
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

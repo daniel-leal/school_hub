@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block title %}Criar Convite - School Hub{% endblock %}
+
+{% block extra_css %}
+<!-- Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<style>
+    .flatpickr-calendar {
+        font-family: 'Space Grotesk', system-ui, sans-serif;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+
+    /* Dark mode flatpickr styles */
+    .dark .flatpickr-calendar {
+        background: #1e293b;
+        border-color: #334155;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    }
+
+    .dark .flatpickr-calendar.arrowTop::before,
+    .dark .flatpickr-calendar.arrowTop::after {
+        border-bottom-color: #1e293b;
+    }
+
+    .dark .flatpickr-months {
+        background: #1e293b;
+    }
+
+    .dark .flatpickr-months .flatpickr-month {
+        background: #1e293b;
+        color: #e2e8f0;
+    }
+
+    .dark .flatpickr-current-month {
+        color: #e2e8f0;
+    }
+
+    .dark .flatpickr-current-month .flatpickr-monthDropdown-months {
+        background: #1e293b;
+        color: #e2e8f0;
+    }
+
+    .dark .flatpickr-current-month .flatpickr-monthDropdown-months option {
+        background: #1e293b;
+        color: #e2e8f0;
+    }
+
+    .dark .flatpickr-current-month input.cur-year {
+        color: #e2e8f0;
+    }
+
+    .dark .flatpickr-months .flatpickr-prev-month,
+    .dark .flatpickr-months .flatpickr-next-month {
+        color: #e2e8f0;
+        fill: #e2e8f0;
+    }
+
+    .dark .flatpickr-months .flatpickr-prev-month:hover,
+    .dark .flatpickr-months .flatpickr-next-month:hover {
+        color: #9333ea;
+    }
+
+    .dark .flatpickr-months .flatpickr-prev-month:hover svg,
+    .dark .flatpickr-months .flatpickr-next-month:hover svg {
+        fill: #9333ea;
+    }
+
+    .dark .flatpickr-weekdays {
+        background: #1e293b;
+    }
+
+    .dark .flatpickr-weekday {
+        background: #1e293b;
+        color: #94a3b8;
+        font-weight: 600;
+    }
+
+    .dark .flatpickr-days {
+        background: #1e293b;
+        border-color: #334155;
+    }
+
+    .dark .dayContainer {
+        background: #1e293b;
+    }
+
+    .dark .flatpickr-day {
+        color: #e2e8f0;
+        border-color: transparent;
+    }
+
+    .dark .flatpickr-day:hover {
+        background: #334155;
+        border-color: #334155;
+    }
+
+    .dark .flatpickr-day.today {
+        border-color: #9333ea;
+    }
+
+    .dark .flatpickr-day.today:hover {
+        background: #9333ea;
+        border-color: #9333ea;
+        color: white;
+    }
+
+    .dark .flatpickr-day.selected,
+    .dark .flatpickr-day.selected:hover {
+        background: #9333ea;
+        border-color: #9333ea;
+        color: white;
+    }
+
+    .dark .flatpickr-day.prevMonthDay,
+    .dark .flatpickr-day.nextMonthDay {
+        color: #475569;
+    }
+
+    .dark .flatpickr-day.flatpickr-disabled,
+    .dark .flatpickr-day.flatpickr-disabled:hover {
+        color: #475569;
+    }
+
+    .dark .flatpickr-time {
+        background: #1e293b;
+        border-color: #334155;
+    }
+
+    .dark .flatpickr-time input {
+        background: #1e293b;
+        color: #e2e8f0;
+    }
+
+    .dark .flatpickr-time .flatpickr-am-pm {
+        background: #1e293b;
+        color: #e2e8f0;
+    }
+
+    .flatpickr-day.selected,
+    .flatpickr-day.selected:hover {
+        background: #9333ea;
+        border-color: #9333ea;
+    }
+
+    .flatpickr-day.today {
+        border-color: #9333ea;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">Criar Convite</h1>
+    <p class="text-gray-600 dark:text-gray-400 mb-6">Turma: {{ school_class.name }}</p>
+
+    <div class="bg-white dark:bg-dark-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-dark-700">
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">E-mail do Convidado (opcional)</label>
+                {{ form.email }}
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    Deixe em branco para criar um convite genérico
+                </p>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Expira em</label>
+                <input type="text" name="expires_at" id="id_expires_at" class="flatpickr-datetime w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent" value="{{ form.expires_at.value|default:'' }}" placeholder="Selecione a data e hora">
+                {% if form.expires_at.errors %}
+                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.expires_at.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div class="flex gap-4 pt-4">
+                <button type="submit" class="px-6 py-3 gradient-bg text-white font-semibold rounded-lg hover:opacity-90 transition-all">
+                    Criar Convite
+                </button>
+                <a href="{% url 'classes:detail' school_class.pk %}" class="px-6 py-3 border border-gray-300 dark:border-dark-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-700 transition-colors">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    flatpickr('.flatpickr-datetime', {
+        locale: 'pt',
+        enableTime: true,
+        dateFormat: 'Y-m-d H:i',
+        altInput: true,
+        altFormat: 'd/m/Y H:i',
+        allowInput: true,
+        time_24hr: true,
+        minDate: 'today',
+        defaultDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 dias a partir de hoje
+    });
+});
+</script>
+{% endblock %}

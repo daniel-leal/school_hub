@@ -1,0 +1,331 @@
+{% extends "base.html" %}
+
+{% block title %}{% if object %}Editar{% else %}Novo{% endif %} Evento - School Hub{% endblock %}
+
+{% block extra_css %}
+<!-- Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<style>
+    .flatpickr-calendar {
+        font-family: 'Space Grotesk', system-ui, sans-serif;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+
+    /* Dark mode flatpickr styles */
+    .dark .flatpickr-calendar {
+        background: #1e293b;
+        border-color: #334155;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    }
+
+    .dark .flatpickr-calendar.arrowTop::before,
+    .dark .flatpickr-calendar.arrowTop::after {
+        border-bottom-color: #1e293b;
+    }
+
+    /* Month navigation */
+    .dark .flatpickr-months {
+        background: #1e293b;
+    }
+
+    .dark .flatpickr-months .flatpickr-month {
+        background: #1e293b;
+        color: #e2e8f0;
+    }
+
+    .dark .flatpickr-current-month {
+        color: #e2e8f0;
+    }
+
+    .dark .flatpickr-current-month .flatpickr-monthDropdown-months {
+        background: #1e293b;
+        color: #e2e8f0;
+    }
+
+    .dark .flatpickr-current-month .flatpickr-monthDropdown-months option {
+        background: #1e293b;
+        color: #e2e8f0;
+    }
+
+    .dark .flatpickr-current-month input.cur-year {
+        color: #e2e8f0;
+    }
+
+    .dark .flatpickr-months .flatpickr-prev-month,
+    .dark .flatpickr-months .flatpickr-next-month {
+        color: #e2e8f0;
+        fill: #e2e8f0;
+    }
+
+    .dark .flatpickr-months .flatpickr-prev-month:hover,
+    .dark .flatpickr-months .flatpickr-next-month:hover {
+        color: #9333ea;
+    }
+
+    .dark .flatpickr-months .flatpickr-prev-month:hover svg,
+    .dark .flatpickr-months .flatpickr-next-month:hover svg {
+        fill: #9333ea;
+    }
+
+    /* Weekdays */
+    .dark .flatpickr-weekdays {
+        background: #1e293b;
+    }
+
+    .dark .flatpickr-weekday {
+        background: #1e293b;
+        color: #94a3b8;
+        font-weight: 600;
+    }
+
+    /* Days */
+    .dark .flatpickr-days {
+        background: #1e293b;
+        border-color: #334155;
+    }
+
+    .dark .dayContainer {
+        background: #1e293b;
+    }
+
+    .dark .flatpickr-day {
+        color: #e2e8f0;
+        border-color: transparent;
+    }
+
+    .dark .flatpickr-day:hover {
+        background: #334155;
+        border-color: #334155;
+    }
+
+    .dark .flatpickr-day.today {
+        border-color: #9333ea;
+    }
+
+    .dark .flatpickr-day.today:hover {
+        background: #9333ea;
+        border-color: #9333ea;
+        color: white;
+    }
+
+    .dark .flatpickr-day.selected,
+    .dark .flatpickr-day.selected:hover {
+        background: #9333ea;
+        border-color: #9333ea;
+        color: white;
+    }
+
+    .dark .flatpickr-day.prevMonthDay,
+    .dark .flatpickr-day.nextMonthDay {
+        color: #475569;
+    }
+
+    .dark .flatpickr-day.flatpickr-disabled,
+    .dark .flatpickr-day.flatpickr-disabled:hover {
+        color: #475569;
+    }
+
+    /* Time picker */
+    .dark .flatpickr-time {
+        background: #1e293b;
+        border-color: #334155;
+    }
+
+    .dark .flatpickr-time input {
+        background: #1e293b;
+        color: #e2e8f0;
+    }
+
+    .dark .flatpickr-time .flatpickr-am-pm {
+        background: #1e293b;
+        color: #e2e8f0;
+    }
+
+    /* Light mode primary color */
+    .flatpickr-day.selected,
+    .flatpickr-day.selected:hover {
+        background: #9333ea;
+        border-color: #9333ea;
+    }
+
+    .flatpickr-day.today {
+        border-color: #9333ea;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">
+        {% if object %}Editar Evento{% else %}Novo Evento{% endif %}
+    </h1>
+
+    {% if school_class %}
+    <p class="text-gray-600 dark:text-gray-400 mb-6">Turma: {{ school_class.name }}</p>
+    {% endif %}
+
+    <div class="bg-white dark:bg-dark-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-dark-700">
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+
+            {% if form.errors %}
+            <div class="p-4 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-lg text-sm">
+                <ul class="list-disc list-inside">
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li>{{ field.label }}: {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Título *</label>
+                {{ form.title }}
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Descrição *</label>
+                {{ form.description }}
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Descreva o objetivo e informações importantes do evento</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tipo do Evento</label>
+                    {{ form.event_type }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Data do Evento *</label>
+                    {{ form.event_date }}
+                </div>
+            </div>
+
+            <hr class="my-6 border-gray-200 dark:border-dark-600">
+
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Localização</h3>
+
+            <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Local do Evento</label>
+                    {{ form.location }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Link do Mapa</label>
+                    {{ form.location_url }}
+                </div>
+            </div>
+
+            <hr class="my-6 border-gray-200 dark:border-dark-600">
+
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Financeiro</h3>
+
+            <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Orçamento Total</label>
+                    {{ form.budget }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Valor por Pessoa</label>
+                    {{ form.individual_amount }}
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Calculado automaticamente se não informado</p>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-sm text-gray-600 dark:text-gray-400">Dados para recebimento PIX</span>
+                <button type="button" id="useMyPixBtn" onclick="loadMyPixInfo()" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium flex items-center">
+                    <span class="material-icons-outlined text-sm mr-1">account_circle</span>
+                    Usar minha chave PIX
+                </button>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Chave PIX</label>
+                    {{ form.pix_key }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nome do Titular</label>
+                    {{ form.pix_holder_name }}
+                </div>
+            </div>
+
+            <div class="flex gap-4 pt-4">
+                <button type="submit" class="px-6 py-3 gradient-bg text-white font-semibold rounded-lg hover:opacity-90 transition-all">
+                    {% if object %}Salvar{% else %}Criar Evento{% endif %}
+                </button>
+                <a href="{% if school_class %}{% url 'classes:detail' school_class.pk %}{% elif object %}{% url 'events:detail' object.pk %}{% else %}{% url 'events:list' %}{% endif %}" class="px-6 py-3 border border-gray-300 dark:border-dark-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-700 transition-colors">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+<script>
+// Initialize Flatpickr for date fields
+document.addEventListener('DOMContentLoaded', function() {
+    flatpickr('.flatpickr-date', {
+        locale: 'pt',
+        dateFormat: 'Y-m-d',
+        altInput: true,
+        altFormat: 'd/m/Y',
+        allowInput: true,
+        disableMobile: false,
+        {% if object.event_date %}
+        defaultDate: '{{ object.event_date|date:"Y-m-d" }}',
+        {% endif %}
+    });
+});
+
+async function loadMyPixInfo() {
+    const btn = document.getElementById('useMyPixBtn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="material-icons-outlined text-sm mr-1 animate-spin">sync</span> Carregando...';
+    btn.disabled = true;
+
+    try {
+        const response = await fetch('{% url "accounts:pix_info" %}');
+        const data = await response.json();
+
+        if (data.error) {
+            alert(data.error);
+            return;
+        }
+
+        if (!data.has_pix) {
+            if (confirm('Você ainda não cadastrou sua chave PIX. Deseja ir para o perfil para cadastrar?')) {
+                window.location.href = '{% url "accounts:profile_update" %}';
+            }
+            return;
+        }
+
+        // Fill the form fields
+        const pixKeyField = document.querySelector('[name="pix_key"]');
+        const pixHolderField = document.querySelector('[name="pix_holder_name"]');
+
+        if (pixKeyField) pixKeyField.value = data.pix_key;
+        if (pixHolderField) pixHolderField.value = data.pix_holder_name;
+
+        btn.innerHTML = '<span class="material-icons-outlined text-sm mr-1">check</span> Dados carregados!';
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }, 2000);
+
+    } catch (error) {
+        console.error('Error loading PIX info:', error);
+        alert('Erro ao carregar dados PIX');
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+</script>
+{% endblock %}

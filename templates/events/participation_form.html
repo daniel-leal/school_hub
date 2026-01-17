@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Confirmar Participação - {{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-6">
+        <a href="{% url 'events:detail' event.pk %}" class="hover:text-primary-600 dark:hover:text-primary-400">{{ event.title }}</a>
+        <span>/</span>
+        <span>Confirmar Participação</span>
+    </div>
+
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        {% if event.is_potluck_event %}
+        Confirmar Lanche
+        {% else %}
+        Confirmar Presença
+        {% endif %}
+    </h1>
+    <p class="text-gray-600 dark:text-gray-400 mb-8">{{ event.title }} • {{ event.event_date|date:"d/m/Y" }}</p>
+
+    <div class="bg-white dark:bg-dark-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-dark-700">
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+
+            {% if form.errors %}
+            <div class="p-4 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-lg text-sm">
+                <ul class="list-disc list-inside">
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li>{{ field.label }}: {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            {% if event.is_potluck_event %}
+            <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 mb-4">
+                <div class="flex items-start">
+                    <span class="material-icons-outlined text-amber-600 dark:text-amber-400 mr-3">restaurant</span>
+                    <div>
+                        <p class="font-medium text-amber-900 dark:text-amber-300">Lanche Partilhado</p>
+                        <p class="text-amber-700 dark:text-amber-400 text-sm">Informe o que você vai levar para o evento.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ form.contribution.label }}</label>
+                {{ form.contribution }}
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Exemplos: Pão de queijo, biscoitos, suco de uva, bolo, frutas...</p>
+            </div>
+            {% endif %}
+
+            {% if event.is_presence_event %}
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
+                <div class="flex items-start">
+                    <span class="material-icons-outlined text-blue-600 dark:text-blue-400 mr-3">event_available</span>
+                    <div>
+                        <p class="font-medium text-blue-900 dark:text-blue-300">Confirmação de Presença</p>
+                        <p class="text-blue-700 dark:text-blue-400 text-sm">Confirme quantas pessoas da família irão ao evento.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ form.guests_count.label }}</label>
+                {{ form.guests_count }}
+            </div>
+            {% endif %}
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Observações</label>
+                {{ form.notes }}
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Restrições alimentares, alergias ou outras informações importantes.</p>
+            </div>
+
+            <div class="flex gap-4 pt-4">
+                <button type="submit" class="px-6 py-3 gradient-bg text-white font-semibold rounded-lg hover:opacity-90 transition-all">
+                    {% if event.is_potluck_event %}
+                    Confirmar Lanche
+                    {% else %}
+                    Confirmar Presença
+                    {% endif %}
+                </button>
+                <a href="{% url 'events:participation_decline' event.pk %}" class="px-6 py-3 border border-gray-300 dark:border-dark-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-700 transition-colors">
+                    Não vou participar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

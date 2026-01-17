@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Remover Aluno - School Hub{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="bg-white dark:bg-dark-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-dark-700 text-center">
+        <span class="material-icons-outlined text-red-500 dark:text-red-400 text-6xl mb-4">warning</span>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Remover Aluno?</h1>
+        <p class="text-gray-600 dark:text-gray-400 mb-6">
+            Tem certeza que deseja remover <strong class="text-gray-900 dark:text-white">{{ object.name }}</strong> da turma?
+            Esta ação não pode ser desfeita.
+        </p>
+
+        <form method="post" class="flex gap-4 justify-center">
+            {% csrf_token %}
+            <button type="submit" class="px-6 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors">
+                Sim, Remover
+            </button>
+            <a href="{% url 'classes:detail' object.school_class.pk %}" class="px-6 py-3 border border-gray-300 dark:border-dark-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-700 transition-colors">
+                Cancelar
+            </a>
+        </form>
+    </div>
+</div>
+{% endblock %}

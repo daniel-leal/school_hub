@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block title %}{{ school_class.name }} - School Hub{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start gap-4 mb-8">
+        <div>
+            <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-2">
+                <a href="{% url 'classes:list' %}" class="hover:text-primary-600 dark:hover:text-primary-400">Turmas</a>
+                <span>/</span>
+                <span>{{ school_class.name }}</span>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ school_class.name }}</h1>
+            <p class="text-gray-600 dark:text-gray-400">{{ school_class.school }} • {{ school_class.year }}</p>
+        </div>
+
+        <div class="flex flex-wrap gap-3">
+            {% if is_member %}
+            <a href="{% url 'events:create' school_class.pk %}" class="px-4 py-2 gradient-bg text-white rounded-lg hover:opacity-90 transition-all">
+                Novo Evento
+            </a>
+            <a href="{% url 'classes:student_create' school_class.pk %}" class="px-4 py-2 border border-primary-600 dark:border-primary-400 text-primary-600 dark:text-primary-400 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">
+                Adicionar Aluno
+            </a>
+            {% endif %}
+            {% if is_admin %}
+            <a href="{% url 'classes:update' school_class.pk %}" class="px-4 py-2 border border-gray-300 dark:border-dark-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-700 transition-colors">
+                Editar
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-8">
+        <!-- Main Content -->
+        <div class="lg:col-span-2 space-y-8">
+            <!-- Events -->
+            <div class="bg-white dark:bg-dark-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-dark-700">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">Eventos Ativos</h2>
+                    <a href="{% url 'events:create' school_class.pk %}" class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm font-medium">
+                        + Novo Evento
+                    </a>
+                </div>
+
+                {% if events %}
+                <div class="space-y-4">
+                    {% for event in events %}
+                    <a href="{% url 'events:detail' event.pk %}" class="block p-4 bg-gray-50 dark:bg-dark-700 rounded-xl hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-bold text-gray-900 dark:text-white">{{ event.title }}</h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">{{ event.event_date|date:"d/m/Y" }}</p>
+                            </div>
+                            <span class="px-2 py-1 text-xs rounded-full {% if event.event_type == 'payment' %}bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400{% elif event.event_type == 'potluck' %}bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400{% else %}bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400{% endif %}">
+                                {{ event.get_event_type_display }}
+                            </span>
+                        </div>
+                        {% if event.budget %}
+                        <div class="mt-3">
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="text-gray-600 dark:text-gray-400">Arrecadação</span>
+                                <span class="font-medium text-gray-900 dark:text-white">{{ event.payment_progress_percentage }}%</span>
+                            </div>
+                            <div class="h-2 bg-gray-200 dark:bg-dark-600 rounded-full overflow-hidden">
+                                <div class="h-full bg-primary-600 rounded-full" style="width: {{ event.payment_progress_percentage }}%"></div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-gray-600 dark:text-gray-400 text-center py-8">Nenhum evento ativo</p>
+                {% endif %}
+            </div>
+
+            <!-- Students -->
+            <div class="bg-white dark:bg-dark-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-dark-700">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">Alunos ({{ students|length }})</h2>
+                </div>
+
+                {% if students %}
+                <div class="grid sm:grid-cols-2 gap-3">
+                    {% for student in students %}
+                    <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-dark-700 rounded-lg">
+                        <div class="flex items-center">
+                            <span class="material-icons-outlined text-primary-600 dark:text-primary-400 mr-3">child_care</span>
+                            <div>
+                                <p class="font-medium text-gray-900 dark:text-white">{{ student.name }}</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ student.guardian }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-gray-600 dark:text-gray-400 text-center py-8">Nenhum aluno cadastrado</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Invite Code & Link -->
+            <div class="bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl shadow-sm p-6 text-white">
+                <h3 class="font-bold mb-2">Convidar Responsáveis</h3>
+                <p class="text-primary-100 text-sm mb-4">Compartilhe o código ou link de cadastro</p>
+
+                <!-- Code -->
+                <div class="mb-4">
+                    <label class="text-primary-100 text-xs uppercase tracking-wider">Código da Turma</label>
+                    <div class="bg-white/20 rounded-lg p-3 text-center mt-1">
+                        <span class="text-2xl font-mono font-bold tracking-widest">{{ school_class.invite_code }}</span>
+                    </div>
+                    <button onclick="navigator.clipboard.writeText('{{ school_class.invite_code }}'); this.innerHTML='✓ Copiado!'; setTimeout(() => this.innerHTML='Copiar Código', 2000)" class="w-full mt-2 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm transition-colors">
+                        Copiar Código
+                    </button>
+                </div>
+
+                <!-- Registration Link -->
+                <div class="border-t border-white/20 pt-4">
+                    <label class="text-primary-100 text-xs uppercase tracking-wider">Link de Cadastro</label>
+                    <p class="text-primary-100 text-xs mt-1 mb-2">O responsável já entra na turma automaticamente ao se cadastrar</p>
+
+                    <!-- Link display -->
+                    <div class="bg-white/10 rounded-lg p-2 mb-2">
+                        <input type="text" readonly id="inviteLink" value="{{ request.scheme }}://{{ request.get_host }}{% url 'accounts:register' %}?class_code={{ school_class.invite_code }}" class="w-full bg-transparent text-xs text-white/90 outline-none cursor-text" onclick="this.select()">
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="flex gap-2">
+                        <button id="copyLinkBtn" onclick="
+                            const link = document.getElementById('inviteLink').value;
+                            navigator.clipboard.writeText(link);
+                            this.innerHTML='<span class=\'material-icons-outlined text-sm mr-1\'>check</span> Copiado!';
+                            setTimeout(() => this.innerHTML='<span class=\'material-icons-outlined text-sm mr-1\'>content_copy</span> Copiar', 2000);
+                        " class="flex-1 py-2 bg-white text-primary-700 rounded-lg text-sm font-medium hover:bg-primary-50 transition-colors flex items-center justify-center">
+                            <span class="material-icons-outlined text-sm mr-1">content_copy</span>
+                            Copiar
+                        </button>
+                        <button id="shareLinkBtn" onclick="
+                            const link = document.getElementById('inviteLink').value;
+                            if (navigator.share) {
+                                navigator.share({
+                                    title: 'Convite para turma {{ school_class.name }}',
+                                    text: 'Entre na turma {{ school_class.name }} do School Hub!',
+                                    url: link
+                                });
+                            } else {
+                                navigator.clipboard.writeText(link);
+                                document.getElementById('copyLinkBtn').innerHTML='<span class=\'material-icons-outlined text-sm mr-1\'>check</span> Copiado!';
+                                setTimeout(() => document.getElementById('copyLinkBtn').innerHTML='<span class=\'material-icons-outlined text-sm mr-1\'>content_copy</span> Copiar', 2000);
+                            }
+                        " class="flex-1 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors flex items-center justify-center">
+                            <span class="material-icons-outlined text-sm mr-1">share</span>
+                            Enviar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Members -->
+            <div class="bg-white dark:bg-dark-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-dark-700">
+                <h3 class="font-bold text-gray-900 dark:text-white mb-4">Membros ({{ members|length }})</h3>
+                <div class="space-y-3">
+                    {% for member in members %}
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-primary-100 dark:bg-primary-900/30 rounded-full flex items-center justify-center text-primary-600 dark:text-primary-400 text-sm font-bold mr-3">
+                                {{ member.guardian.user.first_name.0 }}
+                            </div>
+                            <span class="text-gray-900 dark:text-white">{{ member.guardian }}</span>
+                        </div>
+                        {% if member.is_admin %}
+                        <span class="text-xs bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 px-2 py-1 rounded-full">Admin</span>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {% if is_admin %}
+                <a href="{% url 'classes:create_invitation' school_class.pk %}" class="mt-4 block text-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm font-medium">
+                    + Convidar
+                </a>
+                {% endif %}
+            </div>
+
+            <!-- My Students -->
+            {% if my_students %}
+            <div class="bg-white dark:bg-dark-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-dark-700">
+                <h3 class="font-bold text-gray-900 dark:text-white mb-4">Meus Alunos</h3>
+                <div class="space-y-3">
+                    {% for student in my_students %}
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-900 dark:text-white">{{ student.name }}</span>
+                        <a href="{% url 'classes:student_update' student.pk %}" class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">
+                            <span class="material-icons-outlined text-sm">edit</span>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

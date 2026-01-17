@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - School Hub{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-1">Olá, {{ user.first_name }}!</p>
+        </div>
+    </div>
+
+    {% if not has_guardian %}
+    <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-6 mb-8">
+        <div class="flex items-start">
+            <span class="material-icons-outlined text-amber-600 dark:text-amber-400 text-2xl mr-4">info</span>
+            <div>
+                <h3 class="font-bold text-amber-800 dark:text-amber-300">Complete seu perfil</h3>
+                <p class="text-amber-700 dark:text-amber-400 mt-1">Para começar, complete seu perfil de responsável.</p>
+                <a href="{% url 'accounts:profile_update' %}" class="inline-block mt-3 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors">
+                    Completar Perfil
+                </a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+
+    <!-- Stats Cards -->
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white dark:bg-dark-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-dark-700">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-xl flex items-center justify-center">
+                    <span class="material-icons-outlined text-primary-600 dark:text-primary-400">groups</span>
+                </div>
+                <span class="text-3xl font-bold text-gray-900 dark:text-white">{{ total_classes }}</span>
+            </div>
+            <p class="text-gray-600 dark:text-gray-400">Turmas</p>
+        </div>
+
+        <div class="bg-white dark:bg-dark-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-dark-700">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 bg-accent-100 dark:bg-accent-900/30 rounded-xl flex items-center justify-center">
+                    <span class="material-icons-outlined text-accent-600 dark:text-accent-400">child_care</span>
+                </div>
+                <span class="text-3xl font-bold text-gray-900 dark:text-white">{{ total_students }}</span>
+            </div>
+            <p class="text-gray-600 dark:text-gray-400">Alunos</p>
+        </div>
+
+        <div class="bg-white dark:bg-dark-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-dark-700">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center">
+                    <span class="material-icons-outlined text-amber-600 dark:text-amber-400">event</span>
+                </div>
+                <span class="text-3xl font-bold text-gray-900 dark:text-white">{{ active_events }}</span>
+            </div>
+            <p class="text-gray-600 dark:text-gray-400">Eventos Ativos</p>
+        </div>
+
+        <div class="bg-white dark:bg-dark-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-dark-700">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
+                    <span class="material-icons-outlined text-green-600 dark:text-green-400">payments</span>
+                </div>
+                <span class="text-2xl font-bold text-gray-900 dark:text-white">R$ {{ total_payments|floatformat:0 }}</span>
+            </div>
+            <p class="text-gray-600 dark:text-gray-400">Total Pago</p>
+        </div>
+    </div>
+
+    <!-- Chart and Upcoming Events - Same Size -->
+    <div class="grid md:grid-cols-2 gap-8 mb-8">
+        <!-- Chart -->
+        <div class="bg-white dark:bg-dark-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-dark-700">
+            <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Gastos Mensais</h2>
+            <div class="h-64">
+                <canvas id="expensesChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Upcoming Events -->
+        <div class="bg-white dark:bg-dark-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-dark-700 flex flex-col">
+            <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Próximos Eventos</h2>
+            {% if upcoming_events %}
+            <div class="space-y-4 flex-grow">
+                {% for event in upcoming_events %}
+                <a href="{% url 'events:detail' event.pk %}" class="block p-3 bg-gray-50 dark:bg-dark-700 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="font-medium text-gray-900 dark:text-white">{{ event.title }}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ event.school_class.name }}</p>
+                        </div>
+                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ event.event_date|date:"d/m" }}</span>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-gray-600 dark:text-gray-400 text-center py-8 flex-grow flex items-center justify-center">Nenhum evento próximo</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-8">
+        <!-- Main Content -->
+        <div class="lg:col-span-2 space-y-8">
+            <!-- Recent Payments -->
+            <div class="bg-white dark:bg-dark-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-dark-700">
+                <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Pagamentos Recentes</h2>
+                {% if recent_payments %}
+                <div class="space-y-3">
+                    {% for payment in recent_payments %}
+                    <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-dark-700 rounded-lg">
+                        <div>
+                            <p class="font-medium text-gray-900 dark:text-white">{{ payment.event.title }}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ payment.event.school_class.name }} • {{ payment.created_at|date:"d/m/Y" }}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-gray-900 dark:text-white">R$ {{ payment.amount|floatformat:2 }}</p>
+                            <span class="text-xs {% if payment.status == 'confirmed' %}text-green-600 dark:text-green-400{% elif payment.status == 'pending' %}text-yellow-600 dark:text-yellow-400{% else %}text-red-600 dark:text-red-400{% endif %}">
+                                {{ payment.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-gray-600 dark:text-gray-400 text-center py-8">Nenhum pagamento realizado</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- My Classes -->
+            <div class="bg-white dark:bg-dark-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-dark-700">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold text-gray-900 dark:text-white">Minhas Turmas</h2>
+                    <a href="{% url 'classes:list' %}" class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm">Ver todas</a>
+                </div>
+                {% if classes %}
+                <div class="space-y-3">
+                    {% for class in classes %}
+                    <a href="{% url 'classes:detail' class.pk %}" class="block p-3 bg-gray-50 dark:bg-dark-700 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">
+                        <p class="font-medium text-gray-900 dark:text-white">{{ class.name }}</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ class.students_total }} alunos • {{ class.events_total }} eventos</p>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-gray-600 dark:text-gray-400 text-center py-4">Nenhuma turma</p>
+                <a href="{% url 'classes:create' %}" class="block text-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 mt-2">
+                    Criar turma
+                </a>
+                {% endif %}
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl shadow-sm p-6 text-white">
+                <h2 class="font-bold mb-4">Ações Rápidas</h2>
+                <div class="space-y-2">
+                    <a href="{% url 'classes:create' %}" class="flex items-center p-2 bg-white/20 rounded-lg hover:bg-white/30 transition-colors">
+                        <span class="material-icons-outlined mr-2">add</span>
+                        Nova Turma
+                    </a>
+                    <a href="{% url 'classes:join' %}" class="flex items-center p-2 bg-white/20 rounded-lg hover:bg-white/30 transition-colors">
+                        <span class="material-icons-outlined mr-2">group_add</span>
+                        Entrar em Turma
+                    </a>
+                    <a href="{% url 'suppliers:list' %}" class="flex items-center p-2 bg-white/20 rounded-lg hover:bg-white/30 transition-colors">
+                        <span class="material-icons-outlined mr-2">store</span>
+                        Ver Fornecedores
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('expensesChart');
+    if (ctx) {
+        const chartLabels = {{ chart_labels|safe }};
+        const chartData = {{ chart_data|safe }};
+        const isDark = document.documentElement.classList.contains('dark');
+
+        if (chartLabels.length > 0) {
+            const chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: 'Gastos (R$)',
+                        data: chartData,
+                        backgroundColor: 'rgba(147, 51, 234, 0.8)',
+                        borderColor: 'rgba(147, 51, 234, 1)',
+                        borderWidth: 1,
+                        borderRadius: 8,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: isDark ? '#94a3b8' : '#64748b',
+                                callback: function(value) {
+                                    return 'R$ ' + value;
+                                }
+                            },
+                            grid: {
+                                color: isDark ? 'rgba(148, 163, 184, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: isDark ? '#94a3b8' : '#64748b'
+                            },
+                            grid: {
+                                color: isDark ? 'rgba(148, 163, 184, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Update chart on theme change
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.attributeName === 'class') {
+                        const isDarkNow = document.documentElement.classList.contains('dark');
+                        chart.options.scales.y.ticks.color = isDarkNow ? '#94a3b8' : '#64748b';
+                        chart.options.scales.x.ticks.color = isDarkNow ? '#94a3b8' : '#64748b';
+                        chart.options.scales.y.grid.color = isDarkNow ? 'rgba(148, 163, 184, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+                        chart.options.scales.x.grid.color = isDarkNow ? 'rgba(148, 163, 184, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+                        chart.update();
+                    }
+                });
+            });
+            observer.observe(document.documentElement, { attributes: true });
+        } else {
+            ctx.parentElement.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center py-8">Nenhum dado disponível</p>';
+        }
+    }
+</script>
+{% endblock %}

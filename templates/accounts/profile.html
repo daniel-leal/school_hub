@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Meu Perfil - School Hub{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Meu Perfil</h1>
+        <a href="{% url 'accounts:profile_update' %}" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
+            Editar Perfil
+        </a>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-8">
+        <!-- User Info -->
+        <div class="bg-white dark:bg-dark-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-dark-700">
+            <div class="flex items-center space-x-4 mb-6">
+                <div class="w-20 h-20 gradient-bg rounded-full flex items-center justify-center">
+                    <span class="text-3xl text-white font-bold">
+                        {{ user.first_name.0 }}{{ user.last_name.0 }}
+                    </span>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">{{ user.get_full_name }}</h2>
+                    <p class="text-gray-600 dark:text-gray-400">{{ user.email }}</p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div class="flex items-center text-gray-600 dark:text-gray-400">
+                    <span class="material-icons-outlined mr-3 text-primary-600 dark:text-primary-400">email</span>
+                    <span>{{ user.email }}</span>
+                </div>
+                {% if user.phone %}
+                <div class="flex items-center text-gray-600 dark:text-gray-400">
+                    <span class="material-icons-outlined mr-3 text-primary-600 dark:text-primary-400">phone</span>
+                    <span>{{ user.phone }}</span>
+                </div>
+                {% endif %}
+                <div class="flex items-center text-gray-600 dark:text-gray-400">
+                    <span class="material-icons-outlined mr-3 text-primary-600 dark:text-primary-400">calendar_today</span>
+                    <span>Membro desde {{ user.date_joined|date:"d/m/Y" }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Guardian Info -->
+        {% if guardian %}
+        <div class="bg-white dark:bg-dark-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-dark-700">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Informações Adicionais</h3>
+
+            <div class="space-y-4">
+                {% if guardian.cpf %}
+                <div class="flex items-center text-gray-600 dark:text-gray-400">
+                    <span class="material-icons-outlined mr-3 text-primary-600 dark:text-primary-400">badge</span>
+                    <span>CPF: {{ guardian.cpf }}</span>
+                </div>
+                {% endif %}
+                {% if guardian.pix_key %}
+                <div class="flex items-center text-gray-600 dark:text-gray-400">
+                    <span class="material-icons-outlined mr-3 text-primary-600 dark:text-primary-400">pix</span>
+                    <span>PIX: {{ guardian.pix_key }}</span>
+                </div>
+                {% endif %}
+                {% if guardian.address %}
+                <div class="flex items-start text-gray-600 dark:text-gray-400">
+                    <span class="material-icons-outlined mr-3 text-primary-600 dark:text-primary-400">location_on</span>
+                    <span>{{ guardian.address }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Actions -->
+    <div class="mt-8 bg-white dark:bg-dark-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-dark-700">
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Ações</h3>
+        <div class="flex flex-wrap gap-4">
+            <a href="{% url 'accounts:password_change' %}" class="px-4 py-2 border border-gray-300 dark:border-dark-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-700 transition-colors">
+                Alterar Senha
+            </a>
+            <a href="{% url 'classes:list' %}" class="px-4 py-2 border border-gray-300 dark:border-dark-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-700 transition-colors">
+                Minhas Turmas
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

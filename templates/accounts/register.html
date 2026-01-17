@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Cadastro - School Hub{% endblock %}
+
+{% block content %}
+<div class="min-h-[calc(100vh-200px)] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 pattern-bg">
+    <div class="max-w-md w-full">
+        <div class="bg-white dark:bg-dark-800 rounded-2xl shadow-xl p-8 border border-gray-100 dark:border-dark-700">
+            <div class="text-center mb-8">
+                <span class="material-icons-outlined text-primary-600 dark:text-primary-400 text-5xl mb-4">person_add</span>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Crie sua conta</h2>
+                <p class="text-gray-600 dark:text-gray-400 mt-2">Comece a organizar os eventos escolares</p>
+            </div>
+
+            {% if pending_class %}
+            <div class="mb-6 p-4 bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg">
+                <div class="flex items-center">
+                    <span class="material-icons-outlined text-primary-600 dark:text-primary-400 mr-3">groups</span>
+                    <div>
+                        <p class="font-medium text-primary-900 dark:text-primary-300">Você foi convidado para a turma:</p>
+                        <p class="text-primary-700 dark:text-primary-400">{{ pending_class.name }} {% if pending_class.school %}• {{ pending_class.school }}{% endif %}</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <form method="post" class="space-y-5">
+                {% csrf_token %}
+
+                {% if form.errors %}
+                <div class="p-4 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-lg text-sm">
+                    <ul class="list-disc list-inside">
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li>{{ field.label }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="id_first_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Nome
+                        </label>
+                        {{ form.first_name }}
+                    </div>
+                    <div>
+                        <label for="id_last_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Sobrenome
+                        </label>
+                        {{ form.last_name }}
+                    </div>
+                </div>
+
+                <div>
+                    <label for="id_email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        E-mail
+                    </label>
+                    {{ form.email }}
+                </div>
+
+                <div>
+                    <label for="id_phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Telefone
+                    </label>
+                    {{ form.phone }}
+                </div>
+
+                <div>
+                    <label for="id_password1" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Senha
+                    </label>
+                    {{ form.password1 }}
+                </div>
+
+                <div>
+                    <label for="id_password2" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Confirmar Senha
+                    </label>
+                    {{ form.password2 }}
+                </div>
+
+                <button type="submit" class="w-full py-3 px-4 gradient-bg text-white font-semibold rounded-lg hover:opacity-90 transition-all">
+                    Criar Conta
+                </button>
+            </form>
+
+            <div class="mt-6 text-center">
+                <p class="text-gray-600 dark:text-gray-400">
+                    Já tem uma conta?
+                    <a href="{% url 'accounts:login' %}" class="text-primary-600 dark:text-primary-400 font-medium hover:text-primary-700 dark:hover:text-primary-300">
+                        Entrar
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Sobre - School Hub{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-8">Sobre o School Hub</h1>
+
+    <div class="prose prose-lg dark:prose-invert max-w-none">
+        <p class="text-xl text-gray-600 dark:text-gray-400 mb-8">
+            O School Hub nasceu da necessidade real de organizar eventos escolares de forma mais eficiente.
+        </p>
+
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-12 mb-4">O Problema</h2>
+        <p class="text-gray-600 dark:text-gray-400 mb-6">
+            Grupos de WhatsApp são ótimos para comunicação rápida, mas péssimos para gerenciar
+            arrecadações e eventos paralelos. Listas de quem pagou, comprovantes perdidos,
+            múltiplas transferências PIX... tudo isso gera confusão e trabalho extra para os pais.
+        </p>
+
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-12 mb-4">Nossa Solução</h2>
+        <p class="text-gray-600 dark:text-gray-400 mb-6">
+            Uma plataforma simples onde pais podem organizar eventos, acompanhar pagamentos e
+            coordenar atividades da turma. Tudo em um só lugar, sem complicação.
+        </p>
+
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-12 mb-4">Funcionalidades</h2>
+        <ul class="list-disc list-inside text-gray-600 dark:text-gray-400 space-y-2">
+            <li>Criação de turmas com código de convite</li>
+            <li>Eventos de arrecadação com PIX e QR Code</li>
+            <li>Lanche partilhado com lista de itens</li>
+            <li>Envio e confirmação de comprovantes</li>
+            <li>Dashboard com visão geral de gastos</li>
+            <li>Cadastro de fornecedores (costureiras, decoradoras, etc.)</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
