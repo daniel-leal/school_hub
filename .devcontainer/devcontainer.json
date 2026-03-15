@@ -1,0 +1,60 @@
+{
+  "name": "School Hub",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "web",
+  "workspaceFolder": "/app",
+  "forwardPorts": [
+    8000,
+    5432
+  ],
+  "portsAttributes": {
+    "8000": {
+      "label": "Django Dev Server",
+      "onAutoForward": "notify"
+    },
+    "5432": {
+      "label": "PostgreSQL",
+      "onAutoForward": "silent"
+    }
+  },
+  "postCreateCommand": "python3 -m venv .venv && .venv/bin/python -m pip install -U pip && .venv/bin/pip install -r requirements/dev.txt && .venv/bin/python manage.py migrate",
+  "remoteEnv": {
+    "DJANGO_SETTINGS_MODULE": "config.settings.dev",
+    "DATABASE_URL": "postgres://school_hub:school_hub@db:5432/school_hub",
+    "DEBUG": "True"
+  },
+  "customizations": {
+    "zed": {
+      "extensions": [
+        "python",
+        "html"
+      ]
+    },
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.black-formatter",
+        "ms-python.vscode-pylance",
+        "ms-python.debugpy",
+        "charliermarsh.ruff",
+        "anthropic.claude-code"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/app/.venv/bin/python",
+        "[python]": {
+          "editor.guides.indentation": true,
+          "editor.stickyScroll.enabled": false,
+          "editor.tabSize": 4,
+          "editor.insertSpaces": true,
+          "editor.formatOnSave": true,
+          "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit",
+            "source.fixAll": "explicit"
+          },
+          "editor.suggestSelection": "first",
+          "editor.defaultFormatter": "ms-python.black-formatter"
+        }
+      }
+    }
+  }
+}
