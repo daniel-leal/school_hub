@@ -217,6 +217,7 @@
                 </div>
             </div>
 
+            <div id="financial-section">
             <hr class="my-6 border-gray-200 dark:border-dark-600">
 
             <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Financeiro</h3>
@@ -251,6 +252,7 @@
                     {{ form.pix_holder_name }}
                 </div>
             </div>
+            </div>
 
             <div class="flex gap-4 pt-4">
                 <button type="submit" class="px-6 py-3 gradient-bg text-white font-semibold rounded-lg hover:opacity-90 transition-all">
@@ -270,8 +272,20 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
 <script>
+function updateFormForEventType(eventType) {
+    const financialSection = document.getElementById('financial-section');
+    const isPaymentType = eventType === 'payment' || eventType === 'mixed';
+    financialSection.style.display = isPaymentType ? '' : 'none';
+}
+
 // Initialize Flatpickr for date fields
 document.addEventListener('DOMContentLoaded', function() {
+    const eventTypeSelect = document.querySelector('[name="event_type"]');
+    updateFormForEventType(eventTypeSelect.value);
+    eventTypeSelect.addEventListener('change', function() {
+        updateFormForEventType(this.value);
+    });
+
     flatpickr('.flatpickr-date', {
         locale: 'pt',
         dateFormat: 'Y-m-d',
