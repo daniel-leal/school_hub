@@ -42,14 +42,16 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         # Events
         all_events = Event.objects.filter(school_class_id__in=class_ids)
-        context["total_events"] = all_events.count()
-        context["active_events"] = all_events.filter(is_active=True).count()
-
-        # Upcoming events
-        context["upcoming_events"] = all_events.filter(
+        upcoming_events = all_events.filter(
             is_active=True,
             event_date__gte=date.today(),
-        ).order_by("event_date")[:5]
+        )
+
+        context["total_events"] = all_events.count()
+        context["active_events"] = upcoming_events.count()
+
+        # Upcoming events
+        context["upcoming_events"] = upcoming_events.order_by("event_date")[:5]
 
         # My payments
         my_payments = Payment.objects.filter(guardian=guardian)
