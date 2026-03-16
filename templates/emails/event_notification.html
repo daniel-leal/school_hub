@@ -1,0 +1,37 @@
+{% extends "emails/base_email.html" %}
+
+{% block subject %}Novo evento: {{ event.title }}{% endblock %}
+
+{% block content %}
+<p>Olá!</p>
+<p>
+  Um novo evento foi criado na turma <strong>{{ event.school_class.name }}</strong>:
+</p>
+
+<table style="width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px;">
+  <tr>
+    <td style="padding: 8px 0; color: #6b7280; width: 40%;">Evento</td>
+    <td style="padding: 8px 0; font-weight: 600;">{{ event.title }}</td>
+  </tr>
+  <tr>
+    <td style="padding: 8px 0; color: #6b7280;">Tipo</td>
+    <td style="padding: 8px 0;">{{ event.get_event_type_display }}</td>
+  </tr>
+  <tr>
+    <td style="padding: 8px 0; color: #6b7280;">Data</td>
+    <td style="padding: 8px 0;">{{ event.event_date|date:"d/m/Y" }}</td>
+  </tr>
+  {% if event.individual_amount %}
+  <tr>
+    <td style="padding: 8px 0; color: #6b7280;">Valor por pessoa</td>
+    <td style="padding: 8px 0; font-weight: 600;">R$ {{ event.individual_amount }}</td>
+  </tr>
+  {% endif %}
+</table>
+
+{% if event.description %}
+<p style="background: #f9fafb; border-left: 3px solid #7c3aed; padding: 12px 16px; border-radius: 0 4px 4px 0; font-size: 14px;">
+  {{ event.description }}
+</p>
+{% endif %}
+{% endblock %}

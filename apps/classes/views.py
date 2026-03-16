@@ -18,6 +18,7 @@ from django.views.generic import (
 )
 
 from apps.accounts.models import Guardian
+from apps.core.containers import container
 
 from .forms import ClassForm, InvitationForm, JoinClassForm, StudentForm
 from .models import ClassInvitation, ClassMember, SchoolClass, Student
@@ -233,6 +234,8 @@ class CreateInvitationView(LoginRequiredMixin, CreateView):
         invite_url = self.request.build_absolute_uri(
             reverse_lazy("classes:accept_invitation", kwargs={"token": self.object.token})
         )
+
+        container.core.email_service().send_invitation_email(self.object, invite_url)
 
         messages.success(
             self.request,

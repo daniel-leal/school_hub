@@ -1,0 +1,16 @@
+School Hub — Atualização de Pagamento
+
+Olá, {{ payment.guardian }}!
+
+{% if payment.status == "confirmed" %}Seu pagamento foi CONFIRMADO.
+{% elif payment.status == "rejected" %}Seu pagamento foi REJEITADO.
+{% endif %}
+
+Detalhes:
+  Evento: {{ payment.event.title }}
+  Turma:  {{ payment.event.school_class.name }}
+  Valor:  R$ {{ payment.amount }}
+  Status: {{ payment.get_status_display }}
+
+---
+Este é um e-mail automático. Por favor, não responda.

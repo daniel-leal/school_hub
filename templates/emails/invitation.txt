@@ -1,0 +1,13 @@
+School Hub — Convite para turma
+
+Olá!
+
+{{ invitation.invited_by }} convidou você para participar da turma "{{ invitation.school_class.name }}" no School Hub.
+
+Para aceitar o convite, acesse o link abaixo:
+{{ invite_url }}
+
+Este convite expira em {{ invitation.expires_at|date:"d/m/Y" }}.
+
+---
+Este é um e-mail automático. Por favor, não responda.

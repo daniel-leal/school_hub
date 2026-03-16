@@ -4,8 +4,7 @@
   "service": "web",
   "workspaceFolder": "/app",
   "forwardPorts": [
-    8000,
-    5432
+    8000
   ],
   "portsAttributes": {
     "8000": {
