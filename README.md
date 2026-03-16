@@ -297,17 +297,31 @@ The project follows development best practices:
 
 Main environment variables (see `env.example` for complete list):
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `SECRET_KEY` | Django secret key | - |
-| `DEBUG` | Debug mode | `False` |
-| `DATABASE_URL` | PostgreSQL URL | `postgres://school_hub:school_hub@localhost:5432/school_hub` |
-| `ALLOWED_HOSTS` | Allowed hosts | `localhost,127.0.0.1` |
-| `DJANGO_SETTINGS_MODULE` | Settings module | `config.settings.dev` |
-| `PIX_KEY` | PIX key (optional) | - |
-| `PIX_MERCHANT_NAME` | PIX merchant name | - |
-| `PIX_MERCHANT_CITY` | PIX merchant city | - |
+| Variable | Description           | Default                                                      |
+|----------|-----------------------|--------------------------------------------------------------|
+| `SECRET_KEY` | Django secret key     | -                                                            |
+| `DEBUG` | Debug mode            | `False`                                                      |
+| `DATABASE_URL` | PostgreSQL URL        | `postgres://school_hub:school_hub@localhost:5432/school_hub` |
+| `ALLOWED_HOSTS` | Allowed hosts         | `localhost,127.0.0.1`                                        |
+| `DJANGO_SETTINGS_MODULE` | Settings module       | `config.settings.dev`                                        |
+| `PIX_KEY` | PIX key (optional)    | -                                                            |
+| `PIX_MERCHANT_NAME` | PIX merchant name     | -                                                            |
+| `PIX_MERCHANT_CITY` | PIX merchant city     | -                                                            |
+| `STORAGE_ACCESS_KEY` | Storage Access Key    | minioadmin                                                   | 
+| `STORAGE_SECRET_KEY` | Storage Secret Key    | minioadmin                                                   | 
+| `STORAGE_BUCKET_NAME` | Storage Bucket Name   | school-hub-media                                             | 
+| `STORAGE_ENDPOINT_URL` | Storage Endpoint URL  | http://localhost:9000                                        | 
+| `STORAGE_CUSTOM_DOMAIN` | Storage Custom Domain | -                                                            |
+| `EMAIL_HOST` | Email Host            | localhost                                                    |
+| `EMAIL_PORT` | Email Port            | 1025                                                         |
+| `EMAIL_HOST_USER` | Email User            | -                                                            |
+| `EMAIL_HOST_PASSWORD` | Email Password        | -                                                            |
+| `EMAIL_USE_TLS` | Email Use TLS         | False                                                        |
+| `EMAIL_USE_SSL` | Email Use SSL         | False                                                        |
+| `DEFAULT_FROM_EMAIL` | Email Default FROM   | noreply@localhost                                            |
 
+
+ 
 ## 🧪 Testing
 
 ```bash
