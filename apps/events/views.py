@@ -14,6 +14,7 @@ from django.views import View
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
 from apps.classes.models import SchoolClass
+from apps.core.containers import container
 from apps.core.services.pix import PixService
 
 from .forms import (
@@ -144,6 +145,8 @@ class EventCreateView(LoginRequiredMixin, CreateView):
             self.object.individual_amount = self.object.calculate_individual_amount()
 
         self.object.save()
+
+        container.core.email_service().send_event_notification_email(self.object)
 
         messages.success(self.request, f'Evento "{self.object.title}" criado com sucesso!')
         return redirect("events:detail", pk=self.object.pk)
@@ -321,6 +324,7 @@ class PaymentConfirmView(LoginRequiredMixin, View):
             return redirect("events:detail", pk=event.pk)
 
         payment.confirm(guardian)
+        container.core.email_service().send_payment_status_email(payment)
         messages.success(request, "Pagamento confirmado!")
         return redirect("events:detail", pk=event.pk)
 
@@ -343,6 +347,7 @@ class PaymentRejectView(LoginRequiredMixin, View):
             return redirect("events:detail", pk=event.pk)
 
         payment.reject()
+        container.core.email_service().send_payment_status_email(payment)
         messages.warning(request, "Pagamento rejeitado.")
         return redirect("events:detail", pk=event.pk)
 

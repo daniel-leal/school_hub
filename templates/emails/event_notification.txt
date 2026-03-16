@@ -1,0 +1,15 @@
+School Hub — Novo Evento
+
+Olá!
+
+Um novo evento foi criado na turma {{ event.school_class.name }}:
+
+  Evento: {{ event.title }}
+  Tipo:   {{ event.get_event_type_display }}
+  Data:   {{ event.event_date|date:"d/m/Y" }}{% if event.individual_amount %}
+  Valor:  R$ {{ event.individual_amount }}{% endif %}
+
+{% if event.description %}{{ event.description }}
+
+{% endif %}---
+Este é um e-mail automático. Por favor, não responda.

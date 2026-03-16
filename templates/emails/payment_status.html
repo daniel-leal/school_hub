@@ -1,0 +1,38 @@
+{% extends "emails/base_email.html" %}
+
+{% block subject %}Atualização do pagamento — {{ payment.event.title }}{% endblock %}
+
+{% block content %}
+<p>Olá, <strong>{{ payment.guardian }}</strong>!</p>
+
+{% if payment.status == "confirmed" %}
+<p>
+  Seu pagamento para o evento <strong>{{ payment.event.title }}</strong> foi
+  <strong style="color: #16a34a;">confirmado</strong>. ✓
+</p>
+{% elif payment.status == "rejected" %}
+<p>
+  Seu pagamento para o evento <strong>{{ payment.event.title }}</strong> foi
+  <strong style="color: #dc2626;">rejeitado</strong>.
+</p>
+{% endif %}
+
+<table style="width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px;">
+  <tr>
+    <td style="padding: 8px 0; color: #6b7280; width: 40%;">Evento</td>
+    <td style="padding: 8px 0; font-weight: 500;">{{ payment.event.title }}</td>
+  </tr>
+  <tr>
+    <td style="padding: 8px 0; color: #6b7280;">Turma</td>
+    <td style="padding: 8px 0;">{{ payment.event.school_class.name }}</td>
+  </tr>
+  <tr>
+    <td style="padding: 8px 0; color: #6b7280;">Valor</td>
+    <td style="padding: 8px 0; font-weight: 600;">R$ {{ payment.amount }}</td>
+  </tr>
+  <tr>
+    <td style="padding: 8px 0; color: #6b7280;">Status</td>
+    <td style="padding: 8px 0;">{{ payment.get_status_display }}</td>
+  </tr>
+</table>
+{% endblock %}
