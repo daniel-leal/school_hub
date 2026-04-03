@@ -41,6 +41,7 @@ The application has two main areas:
 - **PostgreSQL**: Database (via psycopg2)
 - **Ruff**: Linter and formatter
 - **Pyright**: Type checker
+- **pre-commit**: Git hooks for automatic code quality checks on every commit
 - **Pytest**: Testing framework
 
 Dependencies are organized by environment:
@@ -361,6 +362,36 @@ pyright
 
 # Check everything
 make check
+```
+
+## 🪝 pre-commit Hooks
+
+The project uses [pre-commit](https://pre-commit.com/) to automatically run ruff on every commit.
+
+### Setup (one-time)
+
+```bash
+# Install dependencies (includes pre-commit)
+make install
+
+# Register the git hook
+make pre-commit-install
+# or
+pre-commit install
+```
+
+### Usage
+
+Hooks run automatically on `git commit`. To run manually:
+
+```bash
+# Run on all files
+make pre-commit-run
+# or
+pre-commit run --all-files
+
+# Update hooks to latest versions
+make pre-commit-update
 ```
 
 ## 📝 Important Notes

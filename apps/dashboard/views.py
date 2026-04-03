@@ -9,9 +9,10 @@ from decimal import Decimal
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count, Sum
 from django.db.models.functions import TruncMonth
+from django.utils import timezone
 from django.views.generic import TemplateView
 
-from apps.classes.models import SchoolClass
+from apps.classes.models import SchoolClass, Student
 from apps.events.models import Event, Payment
 
 
@@ -55,12 +56,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         # My payments
         my_payments = Payment.objects.filter(guardian=guardian)
-        context["total_payments"] = my_payments.aggregate(
-            total=Sum("amount")
-        )["total"] or Decimal("0.00")
-        context["pending_payments_count"] = my_payments.filter(
-            status=Payment.Status.PENDING
-        ).count()
+        context["total_payments"] = my_payments.aggregate(total=Sum("amount"))["total"] or Decimal("0.00")
+        context["pending_payments_count"] = my_payments.filter(status=Payment.Status.PENDING).count()
 
         # Monthly expenses chart data
         monthly_data = list(
@@ -79,15 +76,26 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context["chart_data"] = json.dumps(chart_data)
 
         # Recent payments
-        context["recent_payments"] = my_payments.select_related(
-            "event__school_class"
-        ).order_by("-created_at")[:5]
+        context["recent_payments"] = my_payments.select_related("event__school_class").order_by("-created_at")[:5]
 
         # Classes with their stats (use distinct=True to avoid incorrect counts due to JOINs)
         context["classes"] = classes.annotate(
             events_total=Count("events", distinct=True),
             students_total=Count("students", distinct=True),
         )
+
+        # Birthdays this month
+        today = timezone.localdate()
+        context["birthdays"] = (
+            Student.objects.filter(
+                school_class__members__guardian=guardian,
+                birth_date__month=today.month,
+            )
+            .select_related("school_class")
+            .order_by("birth_date__day")
+            .distinct()
+        )
+        context["today"] = today
 
         return context
 
@@ -104,17 +112,12 @@ def dashboard_callback(request, context):
     total_classes = SchoolClass.objects.filter(is_active=True).count()
     total_events = Event.objects.count()
     active_events = Event.objects.filter(is_active=True).count()
-    total_payments = Payment.objects.filter(
-        status=Payment.Status.CONFIRMED
-    ).aggregate(total=Sum("amount"))["total"] or Decimal("0.00")
+    total_payments = Payment.objects.filter(status=Payment.Status.CONFIRMED).aggregate(total=Sum("amount"))["total"] or Decimal("0.00")
 
     # Monthly events chart
-    monthly_events = (
-        Event.objects.annotate(month=TruncMonth("event_date"))
-        .values("month")
-        .annotate(count=Count("id"))
-        .order_by("month")
-    )[:12]
+    monthly_events = (Event.objects.annotate(month=TruncMonth("event_date")).values("month").annotate(count=Count("id")).order_by("month"))[
+        :12
+    ]
 
     # Monthly payments chart
     monthly_payments = (

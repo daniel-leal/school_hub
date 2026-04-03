@@ -49,9 +49,7 @@ class RegisterView(CreateView):
         # Show pending class info if available
         class_code = self.request.session.get("pending_class_code")
         if class_code:
-            school_class = SchoolClass.objects.filter(
-                invite_code=class_code, is_active=True
-            ).first()
+            school_class = SchoolClass.objects.filter(invite_code=class_code, is_active=True).first()
             context["pending_class"] = school_class
         return context
 
@@ -65,9 +63,7 @@ class RegisterView(CreateView):
         # Check if there's a pending class to join
         class_code = self.request.session.pop("pending_class_code", None)
         if class_code:
-            school_class = SchoolClass.objects.filter(
-                invite_code=class_code, is_active=True
-            ).first()
+            school_class = SchoolClass.objects.filter(invite_code=class_code, is_active=True).first()
             if school_class:
                 ClassMember.objects.get_or_create(
                     school_class=school_class,

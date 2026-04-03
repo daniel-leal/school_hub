@@ -150,20 +150,16 @@ class Event(BaseModel):
     @property
     def pending_participations_students(self):
         """Get students who haven't confirmed participation."""
-        confirmed_guardian_ids = self.participations.filter(
-            status=EventParticipation.Status.CONFIRMED
-        ).values_list("guardian_id", flat=True)
-
-        return Student.objects.filter(school_class=self.school_class).exclude(
-            guardian_id__in=confirmed_guardian_ids
+        confirmed_guardian_ids = self.participations.filter(status=EventParticipation.Status.CONFIRMED).values_list(
+            "guardian_id", flat=True
         )
+
+        return Student.objects.filter(school_class=self.school_class).exclude(guardian_id__in=confirmed_guardian_ids)
 
     @property
     def total_collected(self) -> Decimal:
         """Calculate total amount collected."""
-        return self.payments.filter(status=Payment.Status.CONFIRMED).aggregate(
-            total=models.Sum("amount")
-        )["total"] or Decimal("0.00")
+        return self.payments.filter(status=Payment.Status.CONFIRMED).aggregate(total=models.Sum("amount"))["total"] or Decimal("0.00")
 
     @property
     def total_pending(self) -> Decimal:
@@ -190,13 +186,9 @@ class Event(BaseModel):
     @property
     def pending_students(self):
         """Get list of students who haven't paid."""
-        paid_guardian_ids = self.payments.filter(status=Payment.Status.CONFIRMED).values_list(
-            "guardian_id", flat=True
-        )
+        paid_guardian_ids = self.payments.filter(status=Payment.Status.CONFIRMED).values_list("guardian_id", flat=True)
 
-        return Student.objects.filter(school_class=self.school_class).exclude(
-            guardian_id__in=paid_guardian_ids
-        )
+        return Student.objects.filter(school_class=self.school_class).exclude(guardian_id__in=paid_guardian_ids)
 
     def calculate_individual_amount(self) -> Decimal | None:
         """Calculate amount per person based on budget and student count."""

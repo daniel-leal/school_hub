@@ -72,9 +72,7 @@ class EventDetailView(LoginRequiredMixin, DetailView):
             context["is_responsible"] = self.object.responsible == guardian
             context["can_edit"] = context["is_admin"] or context["is_creator"]
             # Can confirm payments: responsible, creator or admin
-            context["can_confirm_payments"] = (
-                context["is_admin"] or context["is_creator"] or context["is_responsible"]
-            )
+            context["can_confirm_payments"] = context["is_admin"] or context["is_creator"] or context["is_responsible"]
 
             # Check if user has paid
             my_payment = self.object.payments.filter(guardian=guardian).first()
@@ -84,31 +82,21 @@ class EventDetailView(LoginRequiredMixin, DetailView):
             # Check participation status
             my_participation = self.object.participations.filter(guardian=guardian).first()
             context["my_participation"] = my_participation
-            context["has_confirmed_participation"] = (
-                my_participation and my_participation.is_confirmed
-            )
+            context["has_confirmed_participation"] = my_participation and my_participation.is_confirmed
 
         # Event items
         context["items"] = self.object.items.select_related("assigned_to__user").order_by("name")
         context["expense_items"] = self.object.items.filter(item_type=EventItem.ItemType.EXPENSE)
-        context["contribution_items"] = self.object.items.filter(
-            item_type=EventItem.ItemType.CONTRIBUTION
-        )
+        context["contribution_items"] = self.object.items.filter(item_type=EventItem.ItemType.CONTRIBUTION)
 
         # Payments
-        context["payments"] = self.object.payments.select_related("guardian__user").order_by(
-            "-created_at"
-        )
+        context["payments"] = self.object.payments.select_related("guardian__user").order_by("-created_at")
         context["confirmed_payments"] = self.object.payments.filter(status=Payment.Status.CONFIRMED)
         context["pending_payments"] = self.object.payments.filter(status=Payment.Status.PENDING)
 
         # Participations (for potluck/presence events)
-        context["participations"] = self.object.participations.select_related(
-            "guardian__user"
-        ).order_by("-created_at")
-        context["confirmed_participations"] = self.object.participations.filter(
-            status=EventParticipation.Status.CONFIRMED
-        )
+        context["participations"] = self.object.participations.select_related("guardian__user").order_by("-created_at")
+        context["confirmed_participations"] = self.object.participations.filter(status=EventParticipation.Status.CONFIRMED)
 
         # Students status
         context["paid_students"] = self.object.paid_students
@@ -318,9 +306,7 @@ class PaymentConfirmView(LoginRequiredMixin, View):
         is_admin = membership and membership.is_admin
 
         if not (is_responsible or is_admin):
-            messages.error(
-                request, "Você não tem permissão para confirmar pagamentos neste evento."
-            )
+            messages.error(request, "Você não tem permissão para confirmar pagamentos neste evento.")
             return redirect("events:detail", pk=event.pk)
 
         payment.confirm(guardian)
@@ -447,9 +433,7 @@ class ParticipationCreateView(LoginRequiredMixin, CreateView):
                 return redirect("events:detail", pk=self.event.pk)
 
             # Check if already confirmed
-            existing = EventParticipation.objects.filter(
-                event=self.event, guardian=guardian
-            ).first()
+            existing = EventParticipation.objects.filter(event=self.event, guardian=guardian).first()
             if existing and existing.is_confirmed:
                 messages.info(request, "Você já confirmou participação neste evento.")
                 return redirect("events:detail", pk=self.event.pk)
@@ -542,9 +526,7 @@ class ParticipationCancelView(LoginRequiredMixin, View):
             messages.error(request, "Este evento não requer confirmação de participação.")
             return redirect("events:detail", pk=event.pk)
 
-        participation = EventParticipation.objects.filter(
-            event=event, guardian=guardian
-        ).first()
+        participation = EventParticipation.objects.filter(event=event, guardian=guardian).first()
 
         if not participation:
             messages.error(request, "Você não tem participação registrada neste evento.")

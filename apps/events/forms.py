@@ -19,7 +19,7 @@ class EventForm(forms.ModelForm):
                 "class": "w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent flatpickr-date",
                 "type": "text",
                 "placeholder": "Selecione a data",
-            }
+            },
         ),
     )
 
@@ -177,14 +177,10 @@ class PaymentForm(forms.ModelForm):
             # Check file extension
             ext = receipt.name.split(".")[-1].lower()
             if ext not in self.ALLOWED_EXTENSIONS:
-                raise forms.ValidationError(
-                    f"Formato não permitido. Use: {', '.join(self.ALLOWED_EXTENSIONS)}"
-                )
+                raise forms.ValidationError(f"Formato não permitido. Use: {', '.join(self.ALLOWED_EXTENSIONS)}")
             # Check file size
             if receipt.size > self.MAX_FILE_SIZE:
-                raise forms.ValidationError(
-                    "O arquivo é muito grande. Tamanho máximo: 10MB"
-                )
+                raise forms.ValidationError("O arquivo é muito grande. Tamanho máximo: 10MB")
         return receipt
 
 

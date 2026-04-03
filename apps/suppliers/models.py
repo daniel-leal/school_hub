@@ -146,5 +146,6 @@ class Supplier(BaseModel):
             return self.maps_url
         elif self.address:
             from urllib.parse import quote
+
             return f"https://www.google.com/maps/search/?api=1&query={quote(self.address)}"
         return ""

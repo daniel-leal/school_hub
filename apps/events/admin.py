@@ -102,7 +102,15 @@ class EventAdmin(ModelAdmin):
 class EventItemAdmin(ModelAdmin):
     """Admin configuration for EventItem model."""
 
-    list_display = ["name", "event", "item_type", "quantity", "unit_price", "assigned_to", "is_completed"]
+    list_display = [
+        "name",
+        "event",
+        "item_type",
+        "quantity",
+        "unit_price",
+        "assigned_to",
+        "is_completed",
+    ]
     list_filter = ["item_type", "is_completed", "event"]
     search_fields = ["name", "event__title"]
     autocomplete_fields = ["event", "assigned_to"]
@@ -172,9 +180,21 @@ class PaymentAdmin(ModelAdmin):
 class EventParticipationAdmin(ModelAdmin):
     """Admin configuration for EventParticipation model."""
 
-    list_display = ["guardian", "event", "status", "contribution_display", "guests_count", "confirmed_at"]
+    list_display = [
+        "guardian",
+        "event",
+        "status",
+        "contribution_display",
+        "guests_count",
+        "confirmed_at",
+    ]
     list_filter = ["status", "event", "event__school_class"]
-    search_fields = ["guardian__user__first_name", "guardian__user__last_name", "event__title", "contribution"]
+    search_fields = [
+        "guardian__user__first_name",
+        "guardian__user__last_name",
+        "event__title",
+        "contribution",
+    ]
     autocomplete_fields = ["event", "guardian"]
     readonly_fields = ["confirmed_at"]
 

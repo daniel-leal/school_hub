@@ -3,7 +3,8 @@
 
 .PHONY: help install run migrate makemigrations shell superuser collectstatic \
         docker-build docker-up docker-down docker-logs docker-shell docker-migrate \
-        docker-makemigrations docker-superuser lint format test clean
+        docker-makemigrations docker-superuser lint format test clean seed seed-flush \
+        pre-commit-install pre-commit-run pre-commit-update
 
 # Default target
 .DEFAULT_GOAL := help
@@ -56,6 +57,12 @@ superuser: ## Create a superuser
 
 collectstatic: ## Collect static files
 	$(MANAGE) collectstatic --noinput
+
+seed: ## Seed database with development data
+	$(MANAGE) seed
+
+seed-flush: ## Flush and re-seed database with development data
+	$(MANAGE) seed --flush
 
 showmigrations: ## Show all migrations and their status
 	$(MANAGE) showmigrations
@@ -137,6 +144,15 @@ typecheck: ## Run type checking with pyright
 check: lint format-check ## Run all code quality checks
 
 fix: lint-fix format ## Fix all auto-fixable issues
+
+pre-commit-install: ## Install pre-commit hooks
+	pre-commit install
+
+pre-commit-run: ## Run pre-commit hooks on all files
+	pre-commit run --all-files
+
+pre-commit-update: ## Update pre-commit hooks to latest versions
+	pre-commit autoupdate
 
 # =============================================================================
 # TESTING

@@ -12,6 +12,7 @@ WORKDIR /app
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
+    make \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 

@@ -64,12 +64,8 @@ class ClassDetailView(LoginRequiredMixin, DetailView):
                 context["is_admin"] = membership.is_admin
                 context["my_students"] = self.object.students.filter(guardian=guardian)
 
-        context["members"] = self.object.members.select_related(
-            "guardian__user"
-        ).order_by("guardian__user__first_name")
-        context["students"] = self.object.students.select_related(
-            "guardian__user"
-        ).order_by("name")
+        context["members"] = self.object.members.select_related("guardian__user").order_by("guardian__user__first_name")
+        context["students"] = self.object.students.select_related("guardian__user").order_by("name")
         context["events"] = self.object.events.filter(is_active=True).order_by("-event_date")[:5]
 
         return context
@@ -99,8 +95,7 @@ class ClassCreateView(LoginRequiredMixin, CreateView):
 
         messages.success(
             self.request,
-            f'Turma "{self.object.name}" criada com sucesso! '
-            f"Código de convite: {self.object.invite_code}",
+            f'Turma "{self.object.name}" criada com sucesso! Código de convite: {self.object.invite_code}',
         )
         return redirect("classes:detail", pk=self.object.pk)
 
@@ -129,9 +124,7 @@ class StudentCreateView(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["school_class"] = get_object_or_404(
-            SchoolClass, pk=self.kwargs["class_id"]
-        )
+        context["school_class"] = get_object_or_404(SchoolClass, pk=self.kwargs["class_id"])
         return context
 
     def form_valid(self, form):
@@ -231,9 +224,7 @@ class CreateInvitationView(LoginRequiredMixin, CreateView):
         self.object.invited_by = guardian
         self.object.save()
 
-        invite_url = self.request.build_absolute_uri(
-            reverse_lazy("classes:accept_invitation", kwargs={"token": self.object.token})
-        )
+        invite_url = self.request.build_absolute_uri(reverse_lazy("classes:accept_invitation", kwargs={"token": self.object.token}))
 
         container.core.email_service().send_invitation_email(self.object, invite_url)
 
