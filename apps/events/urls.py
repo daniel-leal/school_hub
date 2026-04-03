@@ -25,9 +25,21 @@ urlpatterns = [
     path("pagamentos/<uuid:pk>/confirmar/", views.PaymentConfirmView.as_view(), name="payment_confirm"),
     path("pagamentos/<uuid:pk>/rejeitar/", views.PaymentRejectView.as_view(), name="payment_reject"),
     # Participation (potluck / presence confirmation)
-    path("<uuid:event_id>/participar/", views.ParticipationCreateView.as_view(), name="participation_create"),
-    path("<uuid:event_id>/recusar/", views.ParticipationDeclineView.as_view(), name="participation_decline"),
-    path("<uuid:event_id>/cancelar-participacao/", views.ParticipationCancelView.as_view(), name="participation_cancel"),
+    path(
+        "<uuid:event_id>/participar/",
+        views.ParticipationCreateView.as_view(),
+        name="participation_create",
+    ),
+    path(
+        "<uuid:event_id>/recusar/",
+        views.ParticipationDeclineView.as_view(),
+        name="participation_decline",
+    ),
+    path(
+        "<uuid:event_id>/cancelar-participacao/",
+        views.ParticipationCancelView.as_view(),
+        name="participation_cancel",
+    ),
     # PIX
     path("<uuid:pk>/pix/", views.EventPixView.as_view(), name="pix"),
     path("<uuid:pk>/qrcode/", views.EventQRCodeView.as_view(), name="qrcode"),

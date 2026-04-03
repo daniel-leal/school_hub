@@ -156,6 +156,34 @@
                 {% endif %}
             </div>
 
+            <!-- Birthdays This Month -->
+            <div class="bg-white dark:bg-dark-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-dark-700">
+                <div class="flex items-center mb-4">
+                    <span class="material-icons-outlined text-pink-500 dark:text-pink-400 mr-2">cake</span>
+                    <h2 class="text-lg font-bold text-gray-900 dark:text-white">Aniversariantes do Mês</h2>
+                </div>
+                {% if birthdays %}
+                <div class="space-y-3">
+                    {% for student in birthdays %}
+                    <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-dark-700 rounded-lg">
+                        <div>
+                            <p class="font-medium text-gray-900 dark:text-white">{{ student.name }}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ student.school_class.name }}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            {% if student.birth_date.day == today.day %}
+                            <span class="text-xs font-semibold px-2 py-0.5 bg-pink-100 dark:bg-pink-900/40 text-pink-700 dark:text-pink-300 rounded-full">Hoje!</span>
+                            {% endif %}
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ student.birth_date|date:"d/m" }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-gray-500 dark:text-gray-400 text-center py-4">Nenhum aniversariante este mês.</p>
+                {% endif %}
+            </div>
+
             <!-- Quick Actions -->
             <div class="bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl shadow-sm p-6 text-white">
                 <h2 class="font-bold mb-4">Ações Rápidas</h2>

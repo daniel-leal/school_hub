@@ -61,21 +61,13 @@ class EmailService:
 
     def send_event_notification_email(self, event: "Event") -> None:
         members = event.school_class.members.select_related("guardian__user").all()
-        recipients = [
-            m.guardian.user.email
-            for m in members
-            if m.guardian and m.guardian.user.email
-        ]
+        recipients = [m.guardian.user.email for m in members if m.guardian and m.guardian.user.email]
         if not recipients:
             return
         try:
             text = render_to_string("emails/event_notification.txt", {"event": event})
             subject = f"Novo evento: {event.title}"
-            datatuple = tuple(
-                (subject, text, self.default_from_email, [email]) for email in recipients
-            )
+            datatuple = tuple((subject, text, self.default_from_email, [email]) for email in recipients)
             send_mass_mail(datatuple)
         except Exception:
-            logger.exception(
-                "Failed to send event notification emails for event=%s", event.pk
-            )
+            logger.exception("Failed to send event notification emails for event=%s", event.pk)

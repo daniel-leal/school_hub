@@ -84,9 +84,7 @@ class PixService:
         # Normalize to NFD form (decomposed)
         normalized = unicodedata.normalize("NFD", text)
         # Remove combining characters (accents)
-        without_accents = "".join(
-            char for char in normalized if unicodedata.category(char) != "Mn"
-        )
+        without_accents = "".join(char for char in normalized if unicodedata.category(char) != "Mn")
         return without_accents
 
     def _normalize_pix_key(self, key: str) -> str:
@@ -156,12 +154,7 @@ class PixService:
             if 11 <= ddd <= 99:
                 looks_like_br_phone = True
 
-        is_phone = (
-            has_plus
-            or has_parentheses
-            or (digits_only.startswith("55") and len(digits_only) >= 12)
-            or looks_like_br_phone
-        )
+        is_phone = has_plus or has_parentheses or (digits_only.startswith("55") and len(digits_only) >= 12) or looks_like_br_phone
 
         if is_phone and digits_only:
             # Normalize phone to E.164 format

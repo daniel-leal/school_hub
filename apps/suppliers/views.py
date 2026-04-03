@@ -38,11 +38,7 @@ class SupplierListView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         # Get distinct categories from existing suppliers
         context["categories"] = (
-            Supplier.objects.filter(is_active=True)
-            .exclude(category="")
-            .values_list("category", flat=True)
-            .distinct()
-            .order_by("category")
+            Supplier.objects.filter(is_active=True).exclude(category="").values_list("category", flat=True).distinct().order_by("category")
         )
         context["current_category"] = self.request.GET.get("category", "")
         context["search_query"] = self.request.GET.get("q", "")

@@ -4,6 +4,7 @@ Base settings for School Hub project.
 
 from pathlib import Path
 
+import dj_database_url
 from decouple import Csv, config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -81,12 +82,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-# Database
-import dj_database_url
-
 DATABASES = {
-    "default": dj_database_url.config(
-        default="postgres://school_hub:school_hub@localhost:5432/school_hub",
+    "default": dj_database_url.parse(
+        config("DATABASE_URL", default="postgres://school_hub:school_hub@localhost:5432/school_hub"),
         conn_max_age=600,
         conn_health_checks=True,
     )
