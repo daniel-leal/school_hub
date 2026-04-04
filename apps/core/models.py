@@ -83,8 +83,8 @@ class SoftDeleteModel(models.Model):
         editable=False,
     )
 
-    objects = SoftDeleteManager()
     all_objects = models.Manager()
+    objects = SoftDeleteManager()
 
     class Meta:
         abstract = True

@@ -289,11 +289,13 @@ class Command(BaseCommand):
         # Payments for the PAYMENT event
         class_a_guardians = [guardians[i] for i, c, _ in MEMBERSHIP_MAP if c == 0]
         for i, guardian in enumerate(class_a_guardians):
+            student_count = guardian.students.filter(school_class=classes[0]).count()
+            amount = evt_payment.individual_amount * student_count
             payment, created = Payment.objects.get_or_create(
                 event=evt_payment,
                 guardian=guardian,
                 defaults={
-                    "amount": Decimal("100.00"),
+                    "amount": amount,
                     "status": Payment.Status.CONFIRMED if i < 2 else Payment.Status.PENDING,
                 },
             )
@@ -336,7 +338,7 @@ class Command(BaseCommand):
 
         # Participations for POTLUCK
         class_b_guardians = [guardians[i] for i, c, _ in MEMBERSHIP_MAP if c == 1]
-        contributions = ["Pão de queijo", "Suco natural", "Bolo de cenoura", ""]
+        contributions = ["Pão de queijo", "Suco de uva", "Biscoitos", ""]
         for i, guardian in enumerate(class_b_guardians):
             participation, created = EventParticipation.objects.get_or_create(
                 event=evt_potluck,
@@ -419,11 +421,13 @@ class Command(BaseCommand):
 
         # Payments for MIXED event
         for i, guardian in enumerate(class_a_guardians):
+            student_count = guardian.students.filter(school_class=classes[0]).count()
+            amount = evt_mixed.individual_amount * student_count
             Payment.objects.get_or_create(
                 event=evt_mixed,
                 guardian=guardian,
                 defaults={
-                    "amount": Decimal("160.00"),
+                    "amount": amount,
                     "status": Payment.Status.CONFIRMED if i == 0 else Payment.Status.PENDING,
                 },
             )
@@ -434,7 +438,7 @@ class Command(BaseCommand):
                 event=evt_mixed,
                 guardian=guardian,
                 defaults={
-                    "status": EventParticipation.Status.CONFIRMED if i < 3 else EventParticipation.Status.PENDING,
+                    "status": EventParticipation.Status.CONFIRMED if i == 0 else EventParticipation.Status.PENDING,
                     "guests_count": 2,
                 },
             )
