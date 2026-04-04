@@ -7,13 +7,14 @@ from decimal import Decimal
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Prefetch
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
-from apps.classes.models import SchoolClass
+from apps.classes.models import SchoolClass, Student
 from apps.core.containers import container
 from apps.core.services.pix import PixService
 
@@ -84,24 +85,45 @@ class EventDetailView(LoginRequiredMixin, DetailView):
             context["my_participation"] = my_participation
             context["has_confirmed_participation"] = my_participation and my_participation.is_confirmed
 
+        # Prefetch each guardian's students in this class onto related objects,
+        # so the template can render guardian name (primary) + child names (secondary).
+        class_students_qs = Student.objects.filter(school_class=self.object.school_class)
+        guardian_students_prefetch = Prefetch(
+            "guardian__students",
+            queryset=class_students_qs,
+            to_attr="class_students",
+        )
+
         # Event items
-        context["items"] = self.object.items.select_related("assigned_to__user").order_by("name")
+        context["items"] = (
+            self.object.items.select_related("assigned_to__user")
+            .prefetch_related(
+                Prefetch(
+                    "assigned_to__students",
+                    queryset=class_students_qs,
+                    to_attr="class_students",
+                )
+            )
+            .order_by("name")
+        )
         context["expense_items"] = self.object.items.filter(item_type=EventItem.ItemType.EXPENSE)
         context["contribution_items"] = self.object.items.filter(item_type=EventItem.ItemType.CONTRIBUTION)
 
         # Payments
-        context["payments"] = self.object.payments.select_related("guardian__user").order_by("-created_at")
-        context["confirmed_payments"] = self.object.payments.filter(status=Payment.Status.CONFIRMED)
-        context["pending_payments"] = self.object.payments.filter(status=Payment.Status.PENDING)
+        payments = (
+            self.object.payments.select_related("guardian__user").prefetch_related(guardian_students_prefetch).order_by("-created_at")
+        )
+        context["payments"] = payments
+        context["confirmed_payments"] = payments.filter(status=Payment.Status.CONFIRMED)
+        context["pending_payments"] = payments.filter(status=Payment.Status.PENDING)
 
         # Participations (for potluck/presence events)
-        context["participations"] = self.object.participations.select_related("guardian__user").order_by("-created_at")
-        context["confirmed_participations"] = self.object.participations.filter(status=EventParticipation.Status.CONFIRMED)
-
-        # Students status
-        context["paid_students"] = self.object.paid_students
-        context["pending_students"] = self.object.pending_students
-        context["pending_participations_students"] = self.object.pending_participations_students
+        participations = (
+            self.object.participations.select_related("guardian__user").prefetch_related(guardian_students_prefetch).order_by("-created_at")
+        )
+        context["participations"] = participations
+        context["confirmed_participations"] = participations.filter(status=EventParticipation.Status.CONFIRMED)
+        context["pending_participations"] = participations.filter(status=EventParticipation.Status.PENDING)
 
         return context
 
@@ -265,7 +287,12 @@ class PaymentCreateView(LoginRequiredMixin, CreateView):
     def get_initial(self):
         initial = super().get_initial()
         if self.event.individual_amount:
-            initial["amount"] = self.event.individual_amount
+            guardian = getattr(self.request.user, "guardian", None)
+            if guardian:
+                student_count = self.event.school_class.students.filter(guardian=guardian).count()
+                initial["amount"] = self.event.individual_amount * max(student_count, 1)
+            else:
+                initial["amount"] = self.event.individual_amount
         return initial
 
     def form_valid(self, form):

@@ -149,12 +149,11 @@ class Event(BaseModel):
 
     @property
     def pending_participations_students(self):
-        """Get students who haven't confirmed participation."""
-        confirmed_guardian_ids = self.participations.filter(status=EventParticipation.Status.CONFIRMED).values_list(
-            "guardian_id", flat=True
-        )
-
-        return Student.objects.filter(school_class=self.school_class).exclude(guardian_id__in=confirmed_guardian_ids)
+        """Get students whose guardian has a pending participation for this event."""
+        return Student.objects.filter(
+            guardian__event_participations__event=self,
+            guardian__event_participations__status=EventParticipation.Status.PENDING,
+        ).distinct()
 
     @property
     def total_collected(self) -> Decimal:
@@ -185,10 +184,11 @@ class Event(BaseModel):
 
     @property
     def pending_students(self):
-        """Get list of students who haven't paid."""
-        paid_guardian_ids = self.payments.filter(status=Payment.Status.CONFIRMED).values_list("guardian_id", flat=True)
-
-        return Student.objects.filter(school_class=self.school_class).exclude(guardian_id__in=paid_guardian_ids)
+        """Get students whose guardian has a pending payment for this event."""
+        return Student.objects.filter(
+            guardian__payments__event=self,
+            guardian__payments__status=Payment.Status.PENDING,
+        ).distinct()
 
     def calculate_individual_amount(self) -> Decimal | None:
         """Calculate amount per person based on budget and student count."""
