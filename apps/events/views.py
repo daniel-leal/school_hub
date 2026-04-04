@@ -497,7 +497,7 @@ class ParticipationCreateView(LoginRequiredMixin, CreateView):
             notes=form.cleaned_data.get("notes") or "",
         )
 
-        if self.event.is_potluck_event and participation.contribution:
+        if self.event.event_type == Event.EventType.POTLUCK and participation.contribution:
             messages.success(
                 self.request,
                 f"Participação confirmada! Você vai levar: {participation.contribution}",

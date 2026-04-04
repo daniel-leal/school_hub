@@ -22,7 +22,6 @@ class Event(BaseModel):
         PAYMENT = "payment", "Arrecadação"
         POTLUCK = "potluck", "Lanche Partilhado"
         PRESENCE = "presence", "Confirmação de Presença"
-        MIXED = "mixed", "Misto"
 
     school_class = models.ForeignKey(
         SchoolClass,
@@ -119,16 +118,6 @@ class Event(BaseModel):
         return f"{self.title} - {self.school_class.name}"
 
     @property
-    def is_payment_event(self) -> bool:
-        """Check if this event requires payments."""
-        return self.event_type in [self.EventType.PAYMENT, self.EventType.MIXED]
-
-    @property
-    def is_potluck_event(self) -> bool:
-        """Check if this event is a potluck."""
-        return self.event_type in [self.EventType.POTLUCK, self.EventType.MIXED]
-
-    @property
     def is_presence_event(self) -> bool:
         """Check if this event requires presence confirmation."""
         return self.event_type == self.EventType.PRESENCE
@@ -139,7 +128,6 @@ class Event(BaseModel):
         return self.event_type in [
             self.EventType.POTLUCK,
             self.EventType.PRESENCE,
-            self.EventType.MIXED,
         ]
 
     @property

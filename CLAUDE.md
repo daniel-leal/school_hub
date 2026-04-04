@@ -58,7 +58,7 @@ Event (1) → (many) EventItem | Payment | EventParticipation
 ```
 
 ### Event Types
-Events have 4 types: `PAYMENT`, `POTLUCK`, `PRESENCE`, `MIXED`. Payments use PIX (EMV standard) with QR code generation via `PixService`.
+Events have 3 types: `PAYMENT`, `POTLUCK`, `PRESENCE`. Payments use PIX (EMV standard) with QR code generation via `PixService`.
 
 ### Dependency Injection
 `apps/core/containers.py` defines `CoreContainer` (using `dependency-injector`). `PixService` is registered as a Singleton and injected into event views. Add new services here.

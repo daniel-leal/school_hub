@@ -274,7 +274,7 @@
 <script>
 function updateFormForEventType(eventType) {
     const financialSection = document.getElementById('financial-section');
-    const isPaymentType = eventType === 'payment' || eventType === 'mixed';
+    const isPaymentType = eventType === 'payment';
     financialSection.style.display = isPaymentType ? '' : 'none';
 }
 

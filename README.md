@@ -15,7 +15,7 @@ School events are managed by parents in WhatsApp groups, where there is no prope
 School Hub centralizes all school event management in a single platform, offering:
 
 - **Class Management**: Creation of classes and generic invitations for other parents
-- **Flexible Events**: Support for financial collections, shared snacks, or mixed events
+- **Flexible Events**: Support for financial collections, shared snacks, and presence confirmation events
 - **PIX Integration**: Automatic generation of PIX QR codes and payment links
 - **Payment Management**: Receipt upload and automatic payment confirmation
 - **Dashboard**: Overview of active events, totals, and expenses throughout the year
