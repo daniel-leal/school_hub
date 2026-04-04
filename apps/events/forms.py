@@ -223,7 +223,7 @@ class ParticipationForm(forms.ModelForm):
 
         # Adjust fields based on event type
         if event:
-            if event.is_potluck_event:
+            if event.event_type == event.EventType.POTLUCK:
                 self.fields["contribution"].required = True
                 self.fields["contribution"].label = "O que você vai levar? *"
             else:

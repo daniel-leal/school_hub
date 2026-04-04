@@ -24,10 +24,10 @@
         <div class="flex flex-wrap gap-3">
             {% if event.requires_participation and not has_confirmed_participation %}
             <a href="{% url 'events:participation_create' event.pk %}" class="px-4 py-2 gradient-bg text-white rounded-lg hover:opacity-90 transition-all">
-                {% if event.is_potluck_event %}Informar Lanche{% else %}Confirmar Presença{% endif %}
+                {% if event.event_type == 'potluck' %}Informar Lanche{% else %}Confirmar Presença{% endif %}
             </a>
             {% endif %}
-            {% if not has_paid and event.is_payment_event %}
+            {% if not has_paid and event.event_type == 'payment' %}
             <a href="{% url 'events:payment_create' event.pk %}" class="px-4 py-2 {% if event.requires_participation %}border border-primary-600 dark:border-primary-400 text-primary-600 dark:text-primary-400{% else %}gradient-bg text-white{% endif %} rounded-lg hover:opacity-90 transition-all">
                 Enviar Pagamento
             </a>
@@ -76,7 +76,7 @@
             </div>
 
             <!-- Payment Progress -->
-            {% if event.is_payment_event and event.budget %}
+            {% if event.event_type == 'payment' and event.budget %}
             <div class="bg-white dark:bg-dark-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-dark-700">
                 <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Arrecadação</h2>
 
@@ -98,7 +98,7 @@
             {% endif %}
 
             <!-- Contributions (Potluck) -->
-            {% if event.is_potluck_event and confirmed_participations %}
+            {% if event.event_type == 'potluck' and confirmed_participations %}
             <div class="bg-white dark:bg-dark-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-dark-700">
                 <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
                     <span class="material-icons-outlined text-amber-600 dark:text-amber-400 mr-2 align-middle">restaurant</span>
@@ -323,14 +323,14 @@
                     <span>Pendente</span>
                 </div>
                 <a href="{% url 'events:participation_create' event.pk %}" class="block text-center py-2 gradient-bg text-white rounded-lg hover:opacity-90 transition-all">
-                    {% if event.is_potluck_event %}Informar Lanche{% else %}Confirmar Presença{% endif %}
+                    {% if event.event_type == 'potluck' %}Informar Lanche{% else %}Confirmar Presença{% endif %}
                 </a>
                 {% endif %}
             </div>
             {% endif %}
 
             <!-- My Status - Payment -->
-            {% if event.is_payment_event %}
+            {% if event.event_type == 'payment' %}
             <div class="bg-white dark:bg-dark-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-dark-700">
                 <h3 class="font-bold text-gray-900 dark:text-white mb-4">Meu Pagamento</h3>
                 {% if has_paid %}
@@ -370,7 +370,7 @@
             {% endif %}
 
             <!-- Status Lists - Payment -->
-            {% if event.is_payment_event %}
+            {% if event.event_type == 'payment' %}
             <div class="bg-white dark:bg-dark-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-dark-700">
                 <h3 class="font-bold text-gray-900 dark:text-white mb-4">Quem Pagou</h3>
                 {% if confirmed_payments %}

@@ -381,67 +381,32 @@ class Command(BaseCommand):
                 participation.confirmed_at = timezone.now()
                 participation.save(update_fields=["confirmed_at"])
 
-        # Event 4: MIXED event in Class A
-        evt_mixed, _ = Event.objects.get_or_create(
-            title="Festa de Encerramento",
+        # Event 4: PRESENCE event in Class A
+        evt_passeio, _ = Event.objects.get_or_create(
+            title="Passeio ao Museu",
             school_class=classes[0],
             defaults={
                 "created_by": guardians[0],
-                "description": "Festa de encerramento do ano letivo com lanche e atividades.",
-                "event_type": Event.EventType.MIXED,
-                "event_date": datetime.date(2026, 12, 5),
-                "location": "Escola Estrela Brilhante - Quadra",
-                "budget": Decimal("800.00"),
-                "individual_amount": Decimal("160.00"),
-                "pix_key": "ana.silva@example.com",
-                "pix_holder_name": "Ana Silva",
-                "responsible": guardians[0],
+                "description": "Passeio educativo ao museu de ciências naturais.",
+                "event_type": Event.EventType.PRESENCE,
+                "event_date": datetime.date(2026, 11, 20),
+                "location": "Museu de Ciências Naturais - Centro",
             },
         )
 
-        # Items for MIXED event
-        mixed_items = [
-            ("Decoração", EventItem.ItemType.EXPENSE, Decimal("150.00"), None),
-            ("Bolo", EventItem.ItemType.CONTRIBUTION, None, guardians[3]),
-            ("Refrigerantes", EventItem.ItemType.CONTRIBUTION, None, guardians[4]),
-            ("Salgados", EventItem.ItemType.EXPENSE, Decimal("200.00"), None),
-        ]
-        for name, item_type, price, assigned in mixed_items:
-            EventItem.objects.get_or_create(
-                event=evt_mixed,
-                name=name,
-                defaults={
-                    "item_type": item_type,
-                    "quantity": 1,
-                    "unit_price": price,
-                    "assigned_to": assigned,
-                    "is_completed": False,
-                },
-            )
-
-        # Payments for MIXED event
+        # Participations for PRESENCE event in Class A
         for i, guardian in enumerate(class_a_guardians):
-            student_count = guardian.students.filter(school_class=classes[0]).count()
-            amount = evt_mixed.individual_amount * student_count
-            Payment.objects.get_or_create(
-                event=evt_mixed,
+            participation, created = EventParticipation.objects.get_or_create(
+                event=evt_passeio,
                 guardian=guardian,
                 defaults={
-                    "amount": amount,
-                    "status": Payment.Status.CONFIRMED if i == 0 else Payment.Status.PENDING,
+                    "status": EventParticipation.Status.CONFIRMED if i < 2 else EventParticipation.Status.PENDING,
+                    "guests_count": 1,
                 },
             )
-
-        # Participations for MIXED event
-        for i, guardian in enumerate(class_a_guardians):
-            EventParticipation.objects.get_or_create(
-                event=evt_mixed,
-                guardian=guardian,
-                defaults={
-                    "status": EventParticipation.Status.CONFIRMED if i == 0 else EventParticipation.Status.PENDING,
-                    "guests_count": 2,
-                },
-            )
+            if created and participation.status == EventParticipation.Status.CONFIRMED:
+                participation.confirmed_at = timezone.now()
+                participation.save(update_fields=["confirmed_at"])
 
         self.stdout.write("  Created 4 events with payments, items, and participations")
 
