@@ -1,0 +1,21 @@
+{% comment %}
+Family identity for transactional lists (payments, participations, items).
+
+App convention: the student(s) are the primary identity (events are about the
+children), with the acting guardian shown on a clearly labelled secondary line.
+Siblings in the class are listed together, since a single payment/participation
+belongs to the guardian, not to one specific child. Falls back to the guardian's
+name when no student is linked to this class (e.g. an admin without an enrolled
+child).
+
+Context:
+  guardian  Guardian instance with `class_students` prefetched (see EventDetailView).
+  compact   When true, renders the student line smaller so a sibling heading
+            (e.g. the item name) stays the visual primary. Optional.
+{% endcomment %}
+{% if guardian.class_students %}
+<p class="{% if compact %}text-sm text-gray-700 dark:text-gray-300{% else %}font-medium text-gray-900 dark:text-white{% endif %}">{% for student in guardian.class_students %}{{ student.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+<p class="text-xs text-gray-500 dark:text-gray-400">Responsável: {{ guardian }}</p>
+{% else %}
+<p class="{% if compact %}text-sm text-gray-700 dark:text-gray-300{% else %}font-medium text-gray-900 dark:text-white{% endif %}">{{ guardian }}</p>
+{% endif %}

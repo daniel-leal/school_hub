@@ -113,12 +113,7 @@
                                 <span class="material-icons-outlined text-amber-600 dark:text-amber-400">restaurant</span>
                             </div>
                             <div>
-                                <p class="font-medium text-gray-900 dark:text-white">{{ participation.guardian }}</p>
-                                <div class="flex flex-wrap gap-1 mt-0.5">
-                                    {% for student in participation.guardian.class_students %}
-                                    <span class="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-dark-600 px-2 py-0.5 rounded-full">{{ student.name }}</span>
-                                    {% endfor %}
-                                </div>
+                                {% include "events/partials/_family_identity.html" with guardian=participation.guardian %}
                                 <p class="text-amber-700 dark:text-amber-400 font-medium mt-1">{{ participation.contribution }}</p>
                                 {% if participation.notes %}
                                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ participation.notes }}</p>
@@ -147,12 +142,7 @@
                                 <span class="material-icons-outlined text-blue-600 dark:text-blue-400">check_circle</span>
                             </div>
                             <div>
-                                <p class="font-medium text-gray-900 dark:text-white">{{ participation.guardian }}</p>
-                                <div class="flex flex-wrap gap-1 mt-0.5">
-                                    {% for student in participation.guardian.class_students %}
-                                    <span class="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-dark-600 px-2 py-0.5 rounded-full">{{ student.name }}</span>
-                                    {% endfor %}
-                                </div>
+                                {% include "events/partials/_family_identity.html" with guardian=participation.guardian %}
                                 {% if participation.guests_count > 1 %}
                                 <p class="text-sm text-blue-600 dark:text-blue-400 mt-1">{{ participation.guests_count }} pessoas</p>
                                 {% endif %}
@@ -189,12 +179,7 @@
                             <div>
                                 <p class="font-medium text-gray-900 dark:text-white {% if item.is_completed %}line-through{% endif %}">{{ item.name }}</p>
                                 {% if item.assigned_to %}
-                                <p class="text-sm text-gray-700 dark:text-gray-300">{{ item.assigned_to }}</p>
-                                <div class="flex flex-wrap gap-1 mt-0.5">
-                                    {% for student in item.assigned_to.class_students %}
-                                    <span class="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-dark-600 px-2 py-0.5 rounded-full">{{ student.name }}</span>
-                                    {% endfor %}
-                                </div>
+                                {% include "events/partials/_family_identity.html" with guardian=item.assigned_to compact=True %}
                                 {% endif %}
                             </div>
                         </div>
@@ -241,12 +226,7 @@
                                 </span>
                             </div>
                             <div>
-                                <p class="font-medium text-gray-900 dark:text-white">{{ payment.guardian }}</p>
-                                <div class="flex flex-wrap gap-1 mt-0.5">
-                                    {% for student in payment.guardian.class_students %}
-                                    <span class="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-dark-600 px-2 py-0.5 rounded-full">{{ student.name }}</span>
-                                    {% endfor %}
-                                </div>
+                                {% include "events/partials/_family_identity.html" with guardian=payment.guardian %}
                                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ payment.created_at|date:"d/m/Y H:i" }}</p>
                             </div>
                         </div>
@@ -379,12 +359,7 @@
                     <div class="flex items-center text-green-600 dark:text-green-400">
                         <span class="material-icons-outlined text-sm mr-2 shrink-0">check_circle</span>
                         <div>
-                            <span class="text-gray-900 dark:text-white font-medium">{{ payment.guardian }}</span>
-                            <div class="flex flex-wrap gap-1 mt-0.5">
-                                {% for student in payment.guardian.class_students %}
-                                <span class="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-dark-600 px-2 py-0.5 rounded-full">{{ student.name }}</span>
-                                {% endfor %}
-                            </div>
+                            {% include "events/partials/_family_identity.html" with guardian=payment.guardian %}
                         </div>
                     </div>
                     {% endfor %}
@@ -402,12 +377,7 @@
                     <div class="flex items-center text-gray-600 dark:text-gray-400">
                         <span class="material-icons-outlined text-sm mr-2 shrink-0">radio_button_unchecked</span>
                         <div>
-                            <span class="text-gray-700 dark:text-gray-300">{{ payment.guardian }}</span>
-                            <div class="flex flex-wrap gap-1 mt-0.5">
-                                {% for student in payment.guardian.class_students %}
-                                <span class="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-dark-600 px-2 py-0.5 rounded-full">{{ student.name }}</span>
-                                {% endfor %}
-                            </div>
+                            {% include "events/partials/_family_identity.html" with guardian=payment.guardian %}
                         </div>
                     </div>
                     {% endfor %}
@@ -425,12 +395,7 @@
                     <div class="flex items-center text-gray-600 dark:text-gray-400">
                         <span class="material-icons-outlined text-sm mr-2 shrink-0">radio_button_unchecked</span>
                         <div>
-                            <span class="text-gray-700 dark:text-gray-300">{{ participation.guardian }}</span>
-                            <div class="flex flex-wrap gap-1 mt-0.5">
-                                {% for student in participation.guardian.class_students %}
-                                <span class="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-dark-600 px-2 py-0.5 rounded-full">{{ student.name }}</span>
-                                {% endfor %}
-                            </div>
+                            {% include "events/partials/_family_identity.html" with guardian=participation.guardian %}
                         </div>
                     </div>
                     {% endfor %}
