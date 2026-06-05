@@ -268,6 +268,8 @@ school_hub/
 │   ├── settings/       # Settings (base, dev, prod)
 │   ├── urls.py
 │   └── wsgi.py
+├── docs/
+│   └── mobile-api/     # REST API + Flutter mobile spec (OpenAPI, business rules)
 ├── templates/          # HTML templates
 ├── static/             # Static files
 ├── requirements/       # Dependencies by environment
@@ -293,6 +295,19 @@ The project follows development best practices:
 - **Dependency Injection**: Use of containers and different implementations per environment
 - **Query Optimization**: Avoids N+1 queries, use of transactions
 - **Pagination**: Pagination system with page/size
+
+## 📱 Mobile / API Documentation
+
+A complete specification for exposing the current functionality as a **REST API** to be
+consumed by a future **Flutter** mobile app lives in [`docs/mobile-api/`](docs/mobile-api/):
+
+- Product overview, domain model and business rules
+- Authentication (JWT) and permission matrix
+- Full endpoint reference (web route → API endpoint mapping)
+- PIX (EMV / BR Code) details and notifications
+- **OpenAPI 3.1 contract:** [`docs/mobile-api/openapi.yaml`](docs/mobile-api/openapi.yaml)
+
+Start at [`docs/mobile-api/README.md`](docs/mobile-api/README.md).
 
 ## 🔐 Environment Variables
 

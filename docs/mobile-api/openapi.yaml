@@ -1,0 +1,1382 @@
+openapi: 3.1.0
+info:
+  title: School Hub API
+  version: 1.0.0
+  description: |
+    API REST (alvo) do School Hub para o app mobile Flutter.
+    Contrato a ser implementado na camada DRF do backend Django existente.
+    Veja a documentação em docs/mobile-api/ para regras de negócio e fluxos.
+  license:
+    name: MIT
+servers:
+  - url: https://api.schoolhub.example/api/v1
+    description: Produção (exemplo)
+  - url: http://localhost:8000/api/v1
+    description: Desenvolvimento
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Auth
+  - name: Perfil
+  - name: Turmas
+  - name: Alunos
+  - name: Convites
+  - name: Eventos
+  - name: Itens
+  - name: Pagamentos
+  - name: PIX
+  - name: Participações
+  - name: Fornecedores
+  - name: Dashboard
+
+paths:
+  # ----------------------------- AUTH -----------------------------
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Cadastro de responsável
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RegisterRequest' }
+      responses:
+        '201':
+          description: Criado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RegisterResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login (retorna tokens JWT)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TokenPair' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Renova o access token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refresh]
+              properties:
+                refresh: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access: { type: string }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout (blacklist do refresh)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refresh]
+              properties:
+                refresh: { type: string }
+      responses:
+        '204': { description: Sem conteúdo }
+
+  /auth/password/change:
+    post:
+      tags: [Auth]
+      summary: Alterar senha
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [old_password, new_password]
+              properties:
+                old_password: { type: string }
+                new_password: { type: string }
+      responses:
+        '204': { description: Senha alterada }
+        '400': { $ref: '#/components/responses/ValidationError' }
+
+  # ----------------------------- PERFIL -----------------------------
+  /me:
+    get:
+      tags: [Perfil]
+      summary: Dados do responsável logado
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Profile' }
+    patch:
+      tags: [Perfil]
+      summary: Atualiza perfil (User + Guardian)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProfileUpdate' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Profile' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+
+  /me/pix:
+    get:
+      tags: [Perfil]
+      summary: Informação de PIX do responsável
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PixInfo' }
+
+  # ----------------------------- TURMAS -----------------------------
+  /classes:
+    get:
+      tags: [Turmas]
+      summary: Lista turmas do responsável (paginado)
+      parameters:
+        - $ref: '#/components/parameters/Page'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Paginated'
+                  - type: object
+                    properties:
+                      results:
+                        type: array
+                        items: { $ref: '#/components/schemas/SchoolClass' }
+    post:
+      tags: [Turmas]
+      summary: Cria turma (criador vira admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SchoolClassInput' }
+      responses:
+        '201':
+          description: Criado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SchoolClass' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+
+  /classes/join:
+    post:
+      tags: [Turmas]
+      summary: Entrar em turma por código de convite
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [invite_code]
+              properties:
+                invite_code: { type: string }
+      responses:
+        '200':
+          description: Já era membro
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/JoinResult' }
+        '201':
+          description: Entrou agora
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/JoinResult' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /classes/{id}:
+    parameters:
+      - $ref: '#/components/parameters/UuidId'
+    get:
+      tags: [Turmas]
+      summary: Detalhe da turma
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SchoolClassDetail' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [Turmas]
+      summary: Editar turma (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SchoolClassInput' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SchoolClass' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /classes/{id}/regenerate-code:
+    parameters:
+      - $ref: '#/components/parameters/UuidId'
+    post:
+      tags: [Turmas]
+      summary: Regenera o código de convite (admin)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  invite_code: { type: string }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  # ----------------------------- ALUNOS -----------------------------
+  /classes/{id}/students:
+    parameters:
+      - $ref: '#/components/parameters/UuidId'
+    get:
+      tags: [Alunos]
+      summary: Lista alunos da turma
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Student' }
+    post:
+      tags: [Alunos]
+      summary: Cadastra aluno (dono = responsável logado)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/StudentInput' }
+      responses:
+        '201':
+          description: Criado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Student' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+
+  /students/{id}:
+    parameters:
+      - $ref: '#/components/parameters/UuidId'
+    patch:
+      tags: [Alunos]
+      summary: Edita aluno (somente dono)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/StudentInput' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Student' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Alunos]
+      summary: Remove aluno (somente dono)
+      responses:
+        '204': { description: Removido }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ----------------------------- CONVITES -----------------------------
+  /classes/{id}/invitations:
+    parameters:
+      - $ref: '#/components/parameters/UuidId'
+    post:
+      tags: [Convites]
+      summary: Cria convite (admin). Envia e-mail se houver email.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/InvitationInput' }
+      responses:
+        '201':
+          description: Criado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Invitation' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /invitations/{token}:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Convites]
+      summary: Dados de um convite por token
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/InvitationPublic' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /invitations/{token}/accept:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema: { type: string }
+    post:
+      tags: [Convites]
+      summary: Aceita convite (cria vínculo member)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  class: { $ref: '#/components/schemas/SchoolClassRef' }
+                  membership_role: { type: string, enum: [member, admin] }
+        '422': { $ref: '#/components/responses/BusinessRuleError' }
+
+  # ----------------------------- EVENTOS -----------------------------
+  /events:
+    get:
+      tags: [Eventos]
+      summary: Lista eventos das turmas do responsável (paginado)
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - name: class_id
+          in: query
+          schema: { type: string, format: uuid }
+        - name: event_type
+          in: query
+          schema: { $ref: '#/components/schemas/EventType' }
+        - name: is_active
+          in: query
+          schema: { type: boolean }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Paginated'
+                  - type: object
+                    properties:
+                      results:
+                        type: array
+                        items: { $ref: '#/components/schemas/EventListItem' }
+
+  /classes/{id}/events:
+    parameters:
+      - $ref: '#/components/parameters/UuidId'
+    post:
+      tags: [Eventos]
+      summary: Cria evento na turma (notifica membros por e-mail)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EventInput' }
+      responses:
+        '201':
+          description: Criado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EventDetail' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+
+  /events/{id}:
+    parameters:
+      - $ref: '#/components/parameters/UuidId'
+    get:
+      tags: [Eventos]
+      summary: Detalhe do evento
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EventDetail' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [Eventos]
+      summary: Editar evento (can_edit)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EventInput' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EventDetail' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /events/{id}/close:
+    parameters:
+      - $ref: '#/components/parameters/UuidId'
+    post:
+      tags: [Eventos]
+      summary: Encerrar evento (can_edit)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EventDetail' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  # ----------------------------- ITENS -----------------------------
+  /events/{id}/items:
+    parameters:
+      - $ref: '#/components/parameters/UuidId'
+    get:
+      tags: [Itens]
+      summary: Lista itens do evento
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/EventItem' }
+    post:
+      tags: [Itens]
+      summary: Adiciona item (can_edit)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EventItemInput' }
+      responses:
+        '201':
+          description: Criado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EventItem' }
+
+  /items/{id}:
+    parameters:
+      - $ref: '#/components/parameters/UuidId'
+    patch:
+      tags: [Itens]
+      summary: Edita item (can_edit)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EventItemInput' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EventItem' }
+
+  /items/{id}/assign:
+    parameters:
+      - $ref: '#/components/parameters/UuidId'
+    post:
+      tags: [Itens]
+      summary: Assumir item (atribui ao responsável logado)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EventItem' }
+
+  /items/{id}/complete:
+    parameters:
+      - $ref: '#/components/parameters/UuidId'
+    post:
+      tags: [Itens]
+      summary: Marcar item como concluído
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EventItem' }
+
+  # ----------------------------- PAGAMENTOS -----------------------------
+  /events/{id}/payments:
+    parameters:
+      - $ref: '#/components/parameters/UuidId'
+    get:
+      tags: [Pagamentos]
+      summary: Lista pagamentos do evento
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Payment' }
+    post:
+      tags: [Pagamentos]
+      summary: Enviar pagamento com comprovante (membro com aluno na turma)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [amount]
+              properties:
+                amount: { type: string, example: "20.00" }
+                receipt:
+                  type: string
+                  format: binary
+                  description: Imagem (jpg/jpeg/png/gif/webp) ou PDF, máx 10MB
+                notes: { type: string }
+      responses:
+        '201':
+          description: Criado (status pending)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Payment' }
+        '403':
+          description: Responsável sem aluno na turma
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: Já existe pagamento desse responsável no evento
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /payments/{id}/confirm:
+    parameters:
+      - $ref: '#/components/parameters/UuidId'
+    post:
+      tags: [Pagamentos]
+      summary: Confirmar pagamento (can_confirm_payments) — envia e-mail
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Payment' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /payments/{id}/reject:
+    parameters:
+      - $ref: '#/components/parameters/UuidId'
+    post:
+      tags: [Pagamentos]
+      summary: Rejeitar pagamento (can_confirm_payments) — envia e-mail
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Payment' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  # ----------------------------- PIX -----------------------------
+  /events/{id}/pix:
+    parameters:
+      - $ref: '#/components/parameters/UuidId'
+    get:
+      tags: [PIX]
+      summary: Código copia-e-cola + QR (base64) do evento
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PixPayload' }
+        '400':
+          description: Evento sem PIX configurado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /events/{id}/qrcode:
+    parameters:
+      - $ref: '#/components/parameters/UuidId'
+    get:
+      tags: [PIX]
+      summary: Imagem PNG do QR Code PIX
+      responses:
+        '200':
+          description: OK
+          content:
+            image/png:
+              schema: { type: string, format: binary }
+        '400':
+          description: Evento sem PIX configurado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  # ----------------------------- PARTICIPAÇÕES -----------------------------
+  /events/{id}/participations:
+    parameters:
+      - $ref: '#/components/parameters/UuidId'
+    get:
+      tags: [Participações]
+      summary: Lista participações do evento
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Participation' }
+    post:
+      tags: [Participações]
+      summary: Confirmar participação (potluck/presence; precisa ter aluno na turma)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ParticipationInput' }
+      responses:
+        '200':
+          description: Atualizada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Participation' }
+        '201':
+          description: Criada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Participation' }
+        '403':
+          description: Sem aluno na turma
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '422':
+          description: Evento não requer participação
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /events/{id}/participations/decline:
+    parameters:
+      - $ref: '#/components/parameters/UuidId'
+    post:
+      tags: [Participações]
+      summary: Recusar participação
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                notes: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Participation' }
+
+  /events/{id}/participations/cancel:
+    parameters:
+      - $ref: '#/components/parameters/UuidId'
+    post:
+      tags: [Participações]
+      summary: Cancelar participação confirmada
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Participation' }
+        '422': { $ref: '#/components/responses/BusinessRuleError' }
+
+  # ----------------------------- FORNECEDORES -----------------------------
+  /suppliers:
+    get:
+      tags: [Fornecedores]
+      summary: Lista fornecedores ativos (paginado)
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - name: q
+          in: query
+          schema: { type: string }
+        - name: category
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Paginated'
+                  - type: object
+                    properties:
+                      results:
+                        type: array
+                        items: { $ref: '#/components/schemas/Supplier' }
+    post:
+      tags: [Fornecedores]
+      summary: Cadastrar fornecedor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SupplierInput' }
+      responses:
+        '201':
+          description: Criado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Supplier' }
+
+  /suppliers/categories:
+    get:
+      tags: [Fornecedores]
+      summary: Categorias distintas (de fornecedores ativos)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  categories:
+                    type: array
+                    items: { type: string }
+
+  /suppliers/{id}:
+    parameters:
+      - $ref: '#/components/parameters/UuidId'
+    get:
+      tags: [Fornecedores]
+      summary: Detalhe do fornecedor
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Supplier' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [Fornecedores]
+      summary: Editar fornecedor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SupplierInput' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Supplier' }
+
+  # ----------------------------- DASHBOARD -----------------------------
+  /dashboard:
+    get:
+      tags: [Dashboard]
+      summary: Visão geral do responsável
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Dashboard' }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    Page:
+      name: page
+      in: query
+      schema: { type: integer, minimum: 1, default: 1 }
+    UuidId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+
+  responses:
+    ValidationError:
+      description: Erro de validação
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Unauthorized:
+      description: Não autenticado
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Forbidden:
+      description: Sem permissão
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: Não encontrado
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    BusinessRuleError:
+      description: Violação de regra de negócio
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        detail: { type: string }
+        code: { type: string }
+        fields:
+          type: object
+          additionalProperties:
+            type: array
+            items: { type: string }
+
+    Paginated:
+      type: object
+      properties:
+        count: { type: integer }
+        next: { type: string, nullable: true }
+        previous: { type: string, nullable: true }
+        results:
+          type: array
+          items: {}
+
+    # ----- Enums -----
+    EventType:
+      type: string
+      enum: [payment, potluck, presence]
+    ItemType:
+      type: string
+      enum: [expense, contribution]
+    PaymentStatus:
+      type: string
+      enum: [pending, confirmed, rejected]
+    ParticipationStatus:
+      type: string
+      enum: [pending, confirmed, declined]
+    MemberRole:
+      type: string
+      enum: [admin, member]
+    InvitationStatus:
+      type: string
+      enum: [pending, accepted, expired, cancelled]
+
+    # ----- Auth / Perfil -----
+    RegisterRequest:
+      type: object
+      required: [email, first_name, password]
+      properties:
+        email: { type: string, format: email }
+        first_name: { type: string }
+        last_name: { type: string }
+        phone: { type: string }
+        password: { type: string }
+        class_code: { type: string, nullable: true }
+    RegisterResponse:
+      type: object
+      properties:
+        user: { $ref: '#/components/schemas/User' }
+        guardian_id: { type: string, format: uuid }
+        joined_class:
+          nullable: true
+          allOf: [ { $ref: '#/components/schemas/SchoolClassRef' } ]
+        access: { type: string }
+        refresh: { type: string }
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string }
+    TokenPair:
+      type: object
+      properties:
+        access: { type: string }
+        refresh: { type: string }
+    User:
+      type: object
+      properties:
+        id: { type: integer }
+        email: { type: string, format: email }
+        first_name: { type: string }
+        last_name: { type: string }
+        phone: { type: string }
+        full_name: { type: string }
+    Guardian:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        cpf: { type: string }
+        pix_key: { type: string }
+        pix_holder_name: { type: string }
+        address: { type: string }
+        notes: { type: string }
+    Profile:
+      type: object
+      properties:
+        user: { $ref: '#/components/schemas/User' }
+        guardian: { $ref: '#/components/schemas/Guardian' }
+    ProfileUpdate:
+      type: object
+      properties:
+        first_name: { type: string }
+        last_name: { type: string }
+        phone: { type: string }
+        cpf: { type: string }
+        pix_key: { type: string }
+        pix_holder_name: { type: string }
+        address: { type: string }
+        notes: { type: string }
+    PixInfo:
+      type: object
+      properties:
+        pix_key: { type: string }
+        pix_holder_name: { type: string }
+        has_pix: { type: boolean }
+
+    # ----- Turmas -----
+    SchoolClassRef:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+    SchoolClassInput:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string }
+        school: { type: string }
+        year: { type: integer }
+        description: { type: string }
+    SchoolClass:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        school: { type: string }
+        year: { type: integer }
+        description: { type: string }
+        invite_code: { type: string }
+        is_active: { type: boolean }
+        member_count: { type: integer }
+        student_count: { type: integer }
+        active_events_count: { type: integer }
+        my_role:
+          allOf: [ { $ref: '#/components/schemas/MemberRole' } ]
+          nullable: true
+    SchoolClassDetail:
+      allOf:
+        - $ref: '#/components/schemas/SchoolClass'
+        - type: object
+          properties:
+            is_member: { type: boolean }
+            is_admin: { type: boolean }
+            my_students:
+              type: array
+              items: { $ref: '#/components/schemas/Student' }
+            members:
+              type: array
+              items: { $ref: '#/components/schemas/Member' }
+            students:
+              type: array
+              items: { $ref: '#/components/schemas/Student' }
+            recent_events:
+              type: array
+              items: { $ref: '#/components/schemas/EventListItem' }
+    Member:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        guardian_id: { type: string, format: uuid }
+        full_name: { type: string }
+        role: { $ref: '#/components/schemas/MemberRole' }
+        joined_at: { type: string, format: date-time }
+    JoinResult:
+      type: object
+      properties:
+        class: { $ref: '#/components/schemas/SchoolClass' }
+        created: { type: boolean }
+
+    # ----- Alunos -----
+    StudentInput:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string }
+        birth_date: { type: string, format: date, nullable: true }
+        notes: { type: string }
+    Student:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        birth_date: { type: string, format: date, nullable: true }
+        notes: { type: string }
+        guardian_full_name: { type: string }
+        school_class_id: { type: string, format: uuid }
+
+    # ----- Convites -----
+    InvitationInput:
+      type: object
+      properties:
+        email: { type: string, format: email, nullable: true }
+        expires_at: { type: string, format: date-time, nullable: true }
+    Invitation:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        token: { type: string }
+        email: { type: string }
+        status: { $ref: '#/components/schemas/InvitationStatus' }
+        expires_at: { type: string, format: date-time }
+        invite_url: { type: string }
+    InvitationPublic:
+      type: object
+      properties:
+        token: { type: string }
+        school_class: { $ref: '#/components/schemas/SchoolClassRef' }
+        status: { $ref: '#/components/schemas/InvitationStatus' }
+        is_valid: { type: boolean }
+        expires_at: { type: string, format: date-time }
+
+    # ----- Eventos -----
+    EventInput:
+      type: object
+      required: [title, description, event_type, event_date]
+      properties:
+        title: { type: string }
+        description: { type: string }
+        event_type: { $ref: '#/components/schemas/EventType' }
+        event_date: { type: string, format: date }
+        location: { type: string }
+        location_url: { type: string }
+        budget: { type: string, nullable: true, example: "300.00" }
+        individual_amount: { type: string, nullable: true, example: "20.00" }
+        pix_key: { type: string }
+        pix_holder_name: { type: string }
+    EventListItem:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        title: { type: string }
+        event_type: { $ref: '#/components/schemas/EventType' }
+        event_type_display: { type: string }
+        event_date: { type: string, format: date }
+        is_active: { type: boolean }
+        school_class: { $ref: '#/components/schemas/SchoolClassRef' }
+        created_by_name: { type: string }
+        budget: { type: string, nullable: true }
+        individual_amount: { type: string, nullable: true }
+        payment_progress_percentage: { type: integer }
+        requires_participation: { type: boolean }
+    EventPermissions:
+      type: object
+      properties:
+        is_admin: { type: boolean }
+        is_creator: { type: boolean }
+        is_responsible: { type: boolean }
+        can_edit: { type: boolean }
+        can_confirm_payments: { type: boolean }
+    EventDetail:
+      allOf:
+        - $ref: '#/components/schemas/EventListItem'
+        - type: object
+          properties:
+            description: { type: string }
+            location: { type: string }
+            location_url: { type: string }
+            pix_key: { type: string }
+            pix_holder_name: { type: string }
+            closed_at: { type: string, format: date-time, nullable: true }
+            responsible_name: { type: string, nullable: true }
+            total_collected: { type: string }
+            total_pending: { type: string }
+            permissions: { $ref: '#/components/schemas/EventPermissions' }
+            my_payment:
+              nullable: true
+              allOf: [ { $ref: '#/components/schemas/Payment' } ]
+            has_paid: { type: boolean }
+            my_participation:
+              nullable: true
+              allOf: [ { $ref: '#/components/schemas/Participation' } ]
+            has_confirmed_participation: { type: boolean }
+            items:
+              type: array
+              items: { $ref: '#/components/schemas/EventItem' }
+            expense_items:
+              type: array
+              items: { $ref: '#/components/schemas/EventItem' }
+            contribution_items:
+              type: array
+              items: { $ref: '#/components/schemas/EventItem' }
+            payments:
+              type: array
+              items: { $ref: '#/components/schemas/Payment' }
+            confirmed_payments:
+              type: array
+              items: { $ref: '#/components/schemas/Payment' }
+            pending_payments:
+              type: array
+              items: { $ref: '#/components/schemas/Payment' }
+            participations:
+              type: array
+              items: { $ref: '#/components/schemas/Participation' }
+            confirmed_participations:
+              type: array
+              items: { $ref: '#/components/schemas/Participation' }
+            pending_participations:
+              type: array
+              items: { $ref: '#/components/schemas/Participation' }
+
+    # ----- Itens -----
+    EventItemInput:
+      type: object
+      required: [name, item_type]
+      properties:
+        name: { type: string }
+        description: { type: string }
+        item_type: { $ref: '#/components/schemas/ItemType' }
+        quantity: { type: integer, minimum: 1, default: 1 }
+        unit_price: { type: string, nullable: true }
+    EventItem:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        description: { type: string }
+        item_type: { $ref: '#/components/schemas/ItemType' }
+        item_type_display: { type: string }
+        quantity: { type: integer }
+        unit_price: { type: string, nullable: true }
+        total_price: { type: string, nullable: true }
+        assigned_to_name: { type: string, nullable: true }
+        is_completed: { type: boolean }
+
+    # ----- Pagamentos -----
+    Payment:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        guardian_full_name: { type: string }
+        student_names:
+          type: array
+          items: { type: string }
+        amount: { type: string }
+        receipt_url: { type: string, nullable: true }
+        notes: { type: string }
+        status: { $ref: '#/components/schemas/PaymentStatus' }
+        status_display: { type: string }
+        confirmed_by_name: { type: string, nullable: true }
+        confirmed_at: { type: string, format: date-time, nullable: true }
+        created_at: { type: string, format: date-time }
+
+    # ----- PIX -----
+    PixPayload:
+      type: object
+      properties:
+        pix_key: { type: string }
+        pix_holder_name: { type: string }
+        amount: { type: string }
+        pix_code:
+          type: string
+          description: Código copia-e-cola (EMV BR Code)
+        qr_code_base64:
+          type: string
+          description: PNG do QR em base64
+        qr_code_url: { type: string }
+
+    # ----- Participações -----
+    ParticipationInput:
+      type: object
+      properties:
+        contribution:
+          type: string
+          description: Obrigatório em eventos potluck
+        guests_count:
+          type: integer
+          minimum: 1
+          maximum: 20
+          default: 1
+        notes: { type: string }
+    Participation:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        guardian_full_name: { type: string }
+        student_names:
+          type: array
+          items: { type: string }
+        status: { $ref: '#/components/schemas/ParticipationStatus' }
+        status_display: { type: string }
+        contribution: { type: string }
+        guests_count: { type: integer }
+        notes: { type: string }
+        confirmed_at: { type: string, format: date-time, nullable: true }
+        created_at: { type: string, format: date-time }
+
+    # ----- Fornecedores -----
+    SupplierInput:
+      type: object
+      required: [name, phone]
+      properties:
+        category: { type: string }
+        name: { type: string }
+        contact_name: { type: string }
+        phone: { type: string }
+        whatsapp: { type: string }
+        email: { type: string, format: email }
+        website: { type: string }
+        instagram: { type: string }
+        address: { type: string }
+        maps_url: { type: string }
+        description: { type: string }
+        notes: { type: string }
+    Supplier:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        category: { type: string }
+        name: { type: string }
+        contact_name: { type: string }
+        phone: { type: string }
+        whatsapp: { type: string }
+        email: { type: string }
+        website: { type: string }
+        instagram: { type: string }
+        address: { type: string }
+        maps_url: { type: string }
+        description: { type: string }
+        rating: { type: integer, nullable: true, minimum: 1, maximum: 5 }
+        is_recommended: { type: boolean }
+        is_active: { type: boolean }
+        whatsapp_link: { type: string }
+        instagram_link: { type: string }
+        maps_link: { type: string }
+
+    # ----- Dashboard -----
+    Dashboard:
+      type: object
+      properties:
+        has_guardian: { type: boolean }
+        totals:
+          type: object
+          properties:
+            classes: { type: integer }
+            students: { type: integer }
+            events: { type: integer }
+            active_events: { type: integer }
+            total_payments: { type: string }
+            pending_payments_count: { type: integer }
+        upcoming_events:
+          type: array
+          items: { $ref: '#/components/schemas/EventListItem' }
+        recent_payments:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string, format: uuid }
+              event_title: { type: string }
+              amount: { type: string }
+              status: { $ref: '#/components/schemas/PaymentStatus' }
+              created_at: { type: string, format: date-time }
+        monthly_expenses:
+          type: object
+          properties:
+            labels:
+              type: array
+              items: { type: string }
+            data:
+              type: array
+              items: { type: number }
+        classes:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string, format: uuid }
+              name: { type: string }
+              events_total: { type: integer }
+              students_total: { type: integer }
+        birthdays:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string, format: uuid }
+              name: { type: string }
+              birth_date: { type: string, format: date }
+              school_class_name: { type: string }
+              day: { type: integer }
+        today: { type: string, format: date }

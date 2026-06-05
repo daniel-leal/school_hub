@@ -32,6 +32,13 @@ make docker-up-d      # Start containers in background
 make docker-migrate   # Run migrations in Docker
 ```
 
+## Documentation
+
+- `docs/mobile-api/` — Full spec for exposing the current app as a REST API for a future
+  Flutter mobile client: domain model, business rules, auth/permissions, endpoint
+  reference, PIX/EMV details, and an OpenAPI 3.1 contract (`docs/mobile-api/openapi.yaml`).
+  Start at `docs/mobile-api/README.md`.
+
 ## Architecture
 
 Django 5.1 project following **DDD + SOLID + Object Calisthenics**. Code is in English; UI is in **Portuguese (Brazil)**.
